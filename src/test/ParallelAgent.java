@@ -8,20 +8,14 @@ import java.util.logging.Logger;
 public class ParallelAgent implements Agent {
 
     private static final Logger LOGGER = Logger.getLogger(ParallelAgent.class.getName());
-    private static final String POISON_PILL = "MIICXQIBAAKBgQDLf4fG8p9zK7b2XnS1a9b3c8v6w5u2x1y0z9a8b7c6v4w3u2x1y0z9a8b7c6v4w3u2x1y0z9a8b7c6v4w3u2x1y0z9a8b7c6v4w3u2x1y0z9a8b7c6v4w3u2x1y0z9a8b7c6v4w3u2x1y0z9a8b7c6v4w3u2x1y0z9a8b7c6v4w3u2x1y0z9a8b7c6v4w3u2x1y0z9a8b7c6v4w3u2x1y0z9a8b7c6v4w3u2x1y0z9a8b7c6";
 
     private final Agent agent;
-    private final BlockingQueue<Message> agentMessageQueue;
+    private final BlockingQueue<QueuedAgentPayload> agentPayloadQueue;
     private final Thread workerThread;
-    private volatile String currentTopicName; // Volatile ensures visibility across threads
 
     public ParallelAgent(Agent agent, int capacity) {
         this.agent = agent;
-        this.agentMessageQueue = new ArrayBlockingQueue<>(capacity); // Thread-safe queue
-
-        LOGGER.log(Level.INFO, String.format("Initializing ParallelAgent with capacity %d for agent %s",
-                capacity, agent.getName()));
-
+        this.agentPayloadQueue = new ArrayBlockingQueue<>(capacity);
         this.workerThread = createWorkerThread();
         this.workerThread.start();
         LOGGER.log(Level.FINE, "Worker thread started successfully");
@@ -40,11 +34,9 @@ public class ParallelAgent implements Agent {
 
     @Override
     public void callback(String topicName, Message msg) {
-        LOGGER.log(Level.FINE, "Queueing message for topic {0}", topicName);
-
         try {
-            this.currentTopicName = topicName; // Volatile ensures visibility
-            this.agentMessageQueue.put(msg); // Thread-safe operation
+            LOGGER.log(Level.FINE, "Queueing message for topic {0}", topicName);
+            this.agentPayloadQueue.put(new QueuedAgentPayload(topicName, msg));
             LOGGER.log(Level.FINEST, "Message queued successfully for topic {0}", topicName);
         } catch (InterruptedException e) {
             LOGGER.log(Level.WARNING, "Thread interrupted while queuing a message.", e);
@@ -55,30 +47,9 @@ public class ParallelAgent implements Agent {
     @Override
     public void close() {
         LOGGER.log(Level.INFO, "Closing ParallelAgent for {0}", agent.getName());
-
-        // Send a poison pill to signal the worker thread to exit
-        try {
-            this.agentMessageQueue.put(new Message(POISON_PILL)); // Thread-safe operation
-            LOGGER.log(Level.FINE, "Poison pill sent to worker thread");
-        } catch (InterruptedException e) {
-            LOGGER.log(Level.WARNING, "Thread interrupted while sending poison pill.", e);
-            Thread.currentThread().interrupt();
-        }
-
-        try {
-            workerThread.join(); // Wait for the worker thread to terminate
-            LOGGER.log(Level.FINE, "Worker thread terminated successfully");
-        } catch (InterruptedException e) {
-            LOGGER.log(Level.WARNING, "Interrupted while waiting for worker thread to terminate.", e);
-            Thread.currentThread().interrupt();
-        }
-
-        try {
-            agent.close();
-            LOGGER.log(Level.INFO, "ParallelAgent closed successfully");
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Exception occurred while closing agent.", e);
-        }
+        sendPoisonPill();
+        awaitWorkerThreadTermination();
+        closeAgent();
     }
 
     private Thread createWorkerThread() {
@@ -96,24 +67,81 @@ public class ParallelAgent implements Agent {
     private void pollMessages() {
         while (true) {
             try {
-                Message message = agentMessageQueue.take(); // Thread-safe operation
-
-                if (message.asText.equals(POISON_PILL)) {
+                QueuedAgentPayload payload = agentPayloadQueue.take();
+                if (payload.getIsAgentClosing()) {
                     break;
                 }
-
-                processMessage(message);
+                processMessage(payload);
             } catch (InterruptedException e) {
                 LOGGER.log(Level.WARNING, "Worker thread was interrupted while polling.", e);
-                Thread.currentThread().interrupt(); // Preserve interrupt status
+                Thread.currentThread().interrupt();
             }
         }
     }
 
-    private void processMessage(Message message) {
-        String topicName = currentTopicName; // Volatile ensures visibility
+    private void processMessage(QueuedAgentPayload payload) {
+        String topicName = payload.getTopicName();
         LOGGER.log(Level.FINEST, "Processing message for topic {0}", topicName);
-        agent.callback(topicName, message);
+        agent.callback(topicName, payload.getMessage());
         LOGGER.log(Level.FINEST, "Message processed successfully for topic {0}", topicName);
+    }
+
+    private void sendPoisonPill() {
+        try {
+            LOGGER.log(Level.FINE, "Sending poison pill to worker thread");
+            agentPayloadQueue.put(new QueuedAgentPayload(true));
+        } catch (InterruptedException e) {
+            LOGGER.log(Level.WARNING, "Thread interrupted while sending poison pill.", e);
+            workerThread.interrupt();
+        }
+    }
+
+    private void awaitWorkerThreadTermination() {
+        try {
+            workerThread.join();
+            LOGGER.log(Level.FINE, "Worker thread terminated successfully");
+        } catch (InterruptedException e) {
+            LOGGER.log(Level.WARNING, "Interrupted while waiting for worker thread to terminate.", e);
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    private void closeAgent() {
+        try {
+            agent.close();
+            LOGGER.log(Level.INFO, "ParallelAgent closed successfully");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Exception occurred while closing agent.", e);
+        }
+    }
+}
+
+class QueuedAgentPayload {
+    private final String topicName;
+    private final Message msg;
+    private final boolean isAgentClosing;
+
+    QueuedAgentPayload(String topic, Message msg) {
+        this.topicName = topic;
+        this.msg = msg;
+        this.isAgentClosing = false;
+    }
+
+    QueuedAgentPayload(boolean isAgentClosing) {
+        this.topicName = null;
+        this.msg = null;
+        this.isAgentClosing = isAgentClosing;
+    }
+
+    public String getTopicName() {
+        return this.topicName;
+    }
+
+    public Message getMessage() {
+        return this.msg;
+    }
+
+    public boolean getIsAgentClosing() {
+        return this.isAgentClosing;
     }
 }
