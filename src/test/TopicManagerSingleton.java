@@ -8,6 +8,10 @@ public class TopicManagerSingleton {
     private TopicManagerSingleton() {
     }
 
+    public static TopicManager get() {
+        return TopicManager.INSTANCE;
+    }
+
     public static class TopicManager {
 
         private static final TopicManager INSTANCE = new TopicManager();
@@ -28,9 +32,5 @@ public class TopicManagerSingleton {
         public void clear() {
             nameToTopic.clear();
         }
-    }
-
-    public static TopicManager get() {
-        return TopicManager.INSTANCE;
     }
 }
