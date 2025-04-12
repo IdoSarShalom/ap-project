@@ -18,6 +18,7 @@ public class RequestParser {
         String[] uriSegments = extractUriSegments(resourceUri);
         Map<String, String> parameters = extractParameters(uri);
         Map<String, String> headers = buildHeaders(iterator);
+        buildOtherParameters(iterator);
         byte[] content = buildContentFromIterator(iterator, headers);
 
         return new RequestInfo(httpCommand, uri, resourceUri, uriSegments, parameters, headers, content);
@@ -91,32 +92,25 @@ public class RequestParser {
         return headers;
     }
 
-    private static byte[] buildContentFromIterator(ListIterator<String> iterator, Map<String, String> headers) {
-        StringBuilder contentBuilder = new StringBuilder();
-        String firstContentLine = null;
-
-        if (iterator.hasNext()) {
-            firstContentLine = iterator.next();
-            if (firstContentLine.isEmpty() && iterator.hasNext()) {
-                firstContentLine = iterator.next();
-            }
-        }
-        if (firstContentLine != null && !firstContentLine.isEmpty()) {
-            contentBuilder.append(firstContentLine);
-        }
+    private static void buildOtherParameters(ListIterator<String> iterator) {
 
         while (iterator.hasNext()) {
             String line = iterator.next();
-            contentBuilder.append("\n").append(line);
-        }
-        String fullContent = contentBuilder.toString();
-        String contentLengthStr = headers.get("Content-Length");
-        if (contentLengthStr != null) {
-            int contentLength = Integer.parseInt(contentLengthStr);
-            if (fullContent.length() > contentLength) {
-                fullContent = fullContent.substring(0, contentLength);
+            if (line.isEmpty()) {
+                break;
             }
         }
+    }
+
+    private static byte[] buildContentFromIterator(ListIterator<String> iterator, Map<String, String> headers) {
+        StringBuilder contentBuilder = new StringBuilder();
+
+        while (iterator.hasNext()) {
+            String line = iterator.next();
+            contentBuilder.append(line).append("\n");
+        }
+        String fullContent = contentBuilder.toString();
+
         return fullContent.getBytes();
     }
 
