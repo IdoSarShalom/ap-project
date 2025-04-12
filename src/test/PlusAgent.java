@@ -1,7 +1,5 @@
 package test;
 
-import java.util.Arrays;
-
 public class PlusAgent implements Agent {
 
     private final String[] subscribedTopics;
@@ -83,7 +81,6 @@ public class PlusAgent implements Agent {
 
     private void publishResult() {
         double result = firstOperand + secondOperand;
-        System.out.println(getName() + " Publishing result: " + result + " to topic: " + publishedTopics[0]);
         topicManager.getTopic(publishedTopics[0]).publish(new Message(result));
     }
 

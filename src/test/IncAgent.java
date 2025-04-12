@@ -1,7 +1,5 @@
 package test;
 
-import java.util.Arrays;
-
 public class IncAgent implements Agent {
 
     private final String[] subscribedTopics;
@@ -56,7 +54,6 @@ public class IncAgent implements Agent {
 
     private void publishIncrementedValue(double originalValue) {
         double incrementedValue = originalValue + 1.0;
-        System.out.println(getName() + " Publishing result: " + incrementedValue + " to topic: " + publishedTopics[0]);
         topicManager.getTopic(publishedTopics[0]).publish(new Message(incrementedValue));
     }
 
