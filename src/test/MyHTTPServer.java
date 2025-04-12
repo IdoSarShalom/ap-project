@@ -12,150 +12,158 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-
-/**
- * A basic HTTP server that extends Thread:
- * - On start(), it calls super.start() to run the main loop in parallel.
- * - Maintains a thread pool for client handling.
- * - Routes requests by (command, uriPrefix) to a Servlet using longest-prefix
- * matching.
- */
 public class MyHTTPServer extends Thread implements HTTPServer {
     private final int port;
     private final int nThreads;
     private volatile boolean running;
-    private final Map<String, ConcurrentHashMap<String, Servlet>> httpMethodToPathServletMap;
+    private final ConcurrentHashMap<String, Servlet> getUriToServletMap;
+    private final ConcurrentHashMap<String, Servlet> postUriToServletMap;
+    private final ConcurrentHashMap<String, Servlet> deleteUriToServletMap;
     private ServerSocket serverSocket;
     private ExecutorService executor;
 
     public MyHTTPServer(int port, int maxThreads) {
-        super("MyHTTPServer-MainThread"); // Name the thread if desired
+        super("MyHTTPServer-MainThread");
         this.port = port;
         this.nThreads = maxThreads;
         this.running = false;
-        this.httpMethodToPathServletMap = new ConcurrentHashMap<>();
-        this.httpMethodToPathServletMap.put("GET", new ConcurrentHashMap<>());
-        this.httpMethodToPathServletMap.put("POST", new ConcurrentHashMap<>());
-        this.httpMethodToPathServletMap.put("DELETE", new ConcurrentHashMap<>());
+        this.getUriToServletMap = new ConcurrentHashMap<>();
+        this.postUriToServletMap = new ConcurrentHashMap<>();
+        this.deleteUriToServletMap = new ConcurrentHashMap<>();
         this.serverSocket = null;
         this.executor = null;
     }
 
     @Override
-    public void addServlet(String httpMethod, String path, Servlet s) {
-        httpMethod = httpMethod.toUpperCase();
-        httpMethodToPathServletMap.putIfAbsent(httpMethod, new ConcurrentHashMap<>());
-        httpMethodToPathServletMap.get(httpMethod).put(path, s);
+    public void addServlet(String httpCommand, String uri, Servlet s) {
+        Map<String, Servlet> servletMap = getServletMap(httpCommand.toUpperCase());
+        if (servletMap != null) {
+            servletMap.put(uri, s);
+        }
     }
 
     @Override
-    public void removeServlet(String httpMethod, String path) {
-        httpMethod = httpMethod.toUpperCase();
-        Map<String, Servlet> pathToServlet = httpMethodToPathServletMap.get(httpMethod);
-
-        if (pathToServlet != null) {
-            Servlet servlet = pathToServlet.remove(path);
-
-            if (servlet != null) {
-
-                try {
-                    servlet.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+    public void removeServlet(String httpCommand, String uri) {
+        Map<String, Servlet> servletMap = getServletMap(httpCommand.toUpperCase());
+        if (servletMap != null) {
+            closeAndRemoveServlet(servletMap, uri);
         }
     }
 
     @Override
     public void start() {
-
         if (!running) {
-            running = true;
-            this.executor = Executors.newFixedThreadPool(nThreads);
-            super.start(); // Calls run() method in a new thread
+            initializeServer();
+            super.start();
         }
     }
 
     @Override
     public void run() {
-        try (ServerSocket ss = new ServerSocket(port)) {
-            this.serverSocket = ss;
-            this.serverSocket.setSoTimeout(1000);
-
-            while (running) {
-
-                try {
-                    Socket client = this.serverSocket.accept();
-                    executor.submit(() -> handleClient(client));
-                } catch (IOException e) {
-
-                    if (!running) {
-                        break;
-                    }
-                }
-            }
-
+        try (ServerSocket ss = createServerSocket()) {
+            acceptClientConnections(ss);
         } catch (IOException e) {
             e.printStackTrace();
-
         } finally {
-            closeExecutor(); // Once run() exits, ensure resources are freed
+            closeExecutor();
         }
+    }
+
+    @Override
+    public void close() {
+        stopServer();
+        closeAllServlets();
+        closeExecutor();
     }
 
     private void handleClient(Socket client) {
-
         try (Socket c = client;
              BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream()));
              OutputStream out = c.getOutputStream()) {
-            RequestParser.RequestInfo ri = RequestParser.parseRequest(br);
-
-            if (ri == null) {
-                writeBadRequest(out, "Malformed request");
-                return;
-            }
-            Servlet servlet = getServlet(ri.getHttpMethod(), ri.getPath()); // Find the matching servlet
-
-            if (servlet == null) {
-                writeNotFound(out, "No servlet for " + ri.getHttpMethod() + " " + ri.getPath());
-                return;
-            }
-            servlet.handle(ri, out); // Dispatch to the servlet
-
+            processClientRequest(br, out);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private Servlet getServlet(String httpMethod, String path) {
-        httpMethod = httpMethod.toUpperCase();
-        Map<String, Servlet> pathToServlet = httpMethodToPathServletMap.get(httpMethod);
-
-        if (pathToServlet == null) {
-            return null;
+    private Map<String, Servlet> getServletMap(String httpCommand) {
+        if (httpCommand.equals("GET")) {
+            return getUriToServletMap;
+        } else if (httpCommand.equals("POST")) {
+            return postUriToServletMap;
+        } else if (httpCommand.equals("DELETE")) {
+            return deleteUriToServletMap;
         }
-
-        return matchServletToPath(path, pathToServlet);
+        return null;
     }
 
-    private Servlet matchServletToPath(String path, Map<String, Servlet> pathToServlet) {
-        Servlet matchingServlet = null;
-        int longestPrefixLength = -1;
-
-        for (String currentPath : pathToServlet.keySet()) {
-
-            if (hasLongerPrefix(path, currentPath, longestPrefixLength)) {
-                longestPrefixLength = currentPath.length();
-                matchingServlet = pathToServlet.get(currentPath);
+    private void closeAndRemoveServlet(Map<String, Servlet> servletMap, String uri) {
+        Servlet servlet = servletMap.remove(uri);
+        if (servlet != null) {
+            try {
+                servlet.close();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
-
-        return matchingServlet;
     }
 
-    private boolean hasLongerPrefix(String path, String currentPath, int longestPrefixLength) {
-        return path.startsWith(currentPath) && currentPath.length() > longestPrefixLength;
+    private void initializeServer() {
+        running = true;
+        executor = Executors.newFixedThreadPool(nThreads);
+    }
+
+    private ServerSocket createServerSocket() throws IOException {
+        serverSocket = new ServerSocket(port);
+        serverSocket.setSoTimeout(1000);
+        return serverSocket;
+    }
+
+    private void acceptClientConnections(ServerSocket ss) throws IOException {
+        while (running) {
+            try {
+                Socket client = ss.accept();
+                executor.submit(() -> handleClient(client));
+            } catch (IOException e) {
+                if (!running) {
+                    break;
+                }
+            }
+        }
+    }
+
+    private void processClientRequest(BufferedReader br, OutputStream out) throws IOException {
+        RequestParser.RequestInfo ri = RequestParser.parseRequest(br);
+        if (ri == null) {
+            writeBadRequest(out, "Malformed request");
+            return;
+        }
+        Servlet servlet = findServlet(ri.getHttpCommand(), ri.getResourceUri());
+        if (servlet == null) {
+            writeNotFound(out, "No servlet for " + ri.getHttpCommand() + " " + ri.getResourceUri());
+            return;
+        }
+        servlet.handle(ri, out);
+    }
+
+    private Servlet findServlet(String httpCommand, String uri) {
+        Map<String, Servlet> servletMap = getServletMap(httpCommand.toUpperCase());
+        if (servletMap == null) {
+            return null;
+        }
+        return matchServletToUri(uri, servletMap);
+    }
+
+    private Servlet matchServletToUri(String uri, Map<String, Servlet> uriToServlet) {
+        Servlet matchingServlet = null;
+        int longestPrefixLength = -1;
+        for (String currentUri : uriToServlet.keySet()) {
+            if (uri.startsWith(currentUri) && currentUri.length() > longestPrefixLength) {
+                longestPrefixLength = currentUri.length();
+                matchingServlet = uriToServlet.get(currentUri);
+            }
+        }
+        return matchingServlet;
     }
 
     private void writeBadRequest(OutputStream out, String msg) throws IOException {
@@ -168,23 +176,20 @@ public class MyHTTPServer extends Thread implements HTTPServer {
         out.write(resp.getBytes());
     }
 
-    @Override
-    public void close() {
+    private void stopServer() {
         running = false;
-
         if (serverSocket != null) {
-
             try {
                 serverSocket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+    }
 
-        for (Map<String, Servlet> httpMethodToServlet : httpMethodToPathServletMap.values()) {
-
-            for (Servlet servlet : httpMethodToServlet.values()) {
-
+    private void closeAllServlets() {
+        for (Map<String, Servlet> servletMap : new Map[]{getUriToServletMap, postUriToServletMap, deleteUriToServletMap}) {
+            for (Servlet servlet : servletMap.values()) {
                 try {
                     servlet.close();
                 } catch (IOException e) {
@@ -192,7 +197,6 @@ public class MyHTTPServer extends Thread implements HTTPServer {
                 }
             }
         }
-        closeExecutor();
     }
 
     private void closeExecutor() {
@@ -205,5 +209,4 @@ public class MyHTTPServer extends Thread implements HTTPServer {
             }
         }
     }
-
 }

@@ -13,7 +13,7 @@ public class RequestParser {
         readRequestLine(requestInfo, reader);
         readHeaderLines(requestInfo, reader);
 
-        if (reader.ready()) { // todo: checks!!
+        if (reader.ready()) {
             String nextLine = reader.readLine();
             if (nextLine != null && !nextLine.isEmpty()) {
                 if (isMetadataLine(nextLine)) {
@@ -33,14 +33,14 @@ public class RequestParser {
         String[] firstLineParts = line.split("\\s+", 3);
         validateThreePartsOfFirstLine(firstLineParts);
 
-        String httpMethod = firstLineParts[0].toUpperCase();
+        String httpCommand = firstLineParts[0].toUpperCase();
         String uri = firstLineParts[1];
-        String path = getPath(uri);
-        String[] pathParts = getPathParts(path);
+        String resourceUri = getResourceUri(uri);
+        String[] resourceUriParts = getResourceUriParts(resourceUri);
         String query = getQuery(uri);
         Map<String, String> params = getParams(query);
 
-        setRequestInfo(requestInfo, httpMethod, uri, path, pathParts, params);
+        setRequestInfo(requestInfo, httpCommand, uri, resourceUri, resourceUriParts, params);
     }
 
     private static boolean validateLineIsNotNull(String line) {
@@ -60,12 +60,12 @@ public class RequestParser {
         }
     }
 
-    private static String getPath(String uri) {
+    private static String getResourceUri(String uri) {
         return uri.contains("?") ? uri.substring(0, uri.indexOf('?')) : uri;
     }
 
-    private static String[] getPathParts(String path) {
-        return Arrays.stream(path.split(File.separator))
+    private static String[] getResourceUriParts(String resourceUri) {
+        return Arrays.stream(resourceUri.split(File.separator))
                 .filter(part -> !part.isEmpty())
                 .toArray(String[]::new);
     }
@@ -84,14 +84,13 @@ public class RequestParser {
                         keyValuePair -> keyValuePair.length > 1 ? keyValuePair[1] : ""));
     }
 
-    private static void setRequestInfo(RequestInfo requestInfo, String httpMethod, String uri, String path,
-                                       String[] pathParts,
-                                       Map<String, String> params) {
-        requestInfo.setHttpMethod(httpMethod);
+    private static void setRequestInfo(RequestInfo requestInfo, String httpCommand, String uri, String resourceUri,
+                                       String[] resourceUriParts, Map<String, String> params) {
+        requestInfo.setHttpCommand(httpCommand);
         requestInfo.setUri(uri);
-        requestInfo.setPath(path);
-        requestInfo.setPathParts(pathParts);
-        requestInfo.setParams(params);
+        requestInfo.setResourceUri(resourceUri);
+        requestInfo.setUriSegments(resourceUriParts);
+        requestInfo.setParameters(params);
     }
 
     private static void readHeaderLines(RequestInfo requestInfo, BufferedReader reader) throws IOException {
@@ -126,7 +125,6 @@ public class RequestParser {
 
     private static void parseMetadataLine(Map<String, String> metadata, String line) {
         String[] parts = line.split("=", 2);
-
         if (parts.length == 2) {
             String key = parts[0].trim();
             String value = parts[1].trim().replace("\"", "");
@@ -139,23 +137,12 @@ public class RequestParser {
         Map<String, String> headers = requestInfo.getHeaders();
         String contentLengthStr = headers.get("Content-Length");
 
-        System.out.println("[RequestParser] Content-Length header: " + contentLengthStr);
-        System.out.println("[RequestParser] First content line: " + firstContentLine);
-
         byte[] contentBytes;
         if (contentLengthStr != null) {
             int contentLength = Integer.parseInt(contentLengthStr);
-            System.out.println("[RequestParser] Reading with content length: " + contentLength);
             contentBytes = readContentLength(reader, contentLength, firstContentLine);
         } else {
-            System.out.println("[RequestParser] No Content-Length found, reading until end");
             contentBytes = readFullContent(reader, firstContentLine);
-        }
-
-        if (contentBytes != null) {
-            System.out.println("[RequestParser] Content bytes length: " + contentBytes.length);
-        } else {
-            System.out.println("[RequestParser] Content bytes is null");
         }
 
         requestInfo.setContent(contentBytes);
@@ -164,7 +151,6 @@ public class RequestParser {
     private static byte[] readContentLength(BufferedReader reader, int contentLength, String line)
             throws IOException {
         if (contentLength < 1000) {
-            System.out.println("[RequestParser] Using simplified content reading for small content length");
             StringBuilder sb = new StringBuilder();
 
             if (line != null && !line.isEmpty()) {
@@ -185,7 +171,6 @@ public class RequestParser {
                 content = content.substring(0, contentLength);
             }
 
-            System.out.println("[RequestParser] Read content: " + content);
             return content.getBytes();
         }
 
@@ -194,7 +179,7 @@ public class RequestParser {
         line.getChars(0, bufferedChars, buffer, 0);
         int read;
 
-        while (reader.ready() && bufferedChars < contentLength && (read = reader.read(buffer, bufferedChars, contentLength - bufferedChars)) != -1)  {
+        while (reader.ready() && bufferedChars < contentLength && (read = reader.read(buffer, bufferedChars, contentLength - bufferedChars)) != -1) {
             bufferedChars += read;
         }
 
@@ -213,13 +198,12 @@ public class RequestParser {
         return content.toString().getBytes();
     }
 
-    // Inner class RequestInfo
     public static class RequestInfo {
-        private String httpMethod; // e.g. GET, POST, DELETE
+        private String httpCommand; // e.g. GET, POST, DELETE
         private String uri; // e.g. /api/resource?id=123&name=test
-        private String path; // /api/resource
-        private String[] pathParts; // e.g. "api, resource"
-        private Map<String, String> params; // e.g. {id=123, name=test}
+        private String resourceUri; // /api/resource
+        private String[] uriSegments; // e.g. "api, resource"
+        private Map<String, String> parameters; // e.g. {id=123, name=test}
         private Map<String, String> headers;
         private Map<String, String> metadata;
         private byte[] content;
@@ -227,24 +211,24 @@ public class RequestParser {
         public RequestInfo() {
         }
 
-        public String getHttpMethod() {
-            return this.httpMethod;
+        public String getHttpCommand() {
+            return this.httpCommand;
         }
 
         public String getUri() {
             return this.uri;
         }
 
-        public String getPath() {
-            return this.path;
+        public String getResourceUri() {
+            return this.resourceUri;
         }
 
-        public String[] getPathParts() {
-            return this.pathParts;
+        public String[] getUriSegments() {
+            return this.uriSegments;
         }
 
-        public Map<String, String> getParams() {
-            return this.params;
+        public Map<String, String> getParameters() {
+            return this.parameters;
         }
 
         public Map<String, String> getHeaders() {
@@ -255,24 +239,24 @@ public class RequestParser {
             return this.content;
         }
 
-        public void setHttpMethod(String httpMethod) {
-            this.httpMethod = httpMethod;
+        public void setHttpCommand(String httpCommand) {
+            this.httpCommand = httpCommand;
         }
 
         public void setUri(String uri) {
             this.uri = uri;
         }
 
-        public void setPath(String path) {
-            this.path = path;
+        public void setResourceUri(String resourceUri) {
+            this.resourceUri = resourceUri;
         }
 
-        public void setPathParts(String[] pathParts) {
-            this.pathParts = pathParts;
+        public void setUriSegments(String[] uriSegments) {
+            this.uriSegments = uriSegments;
         }
 
-        public void setParams(Map<String, String> params) {
-            this.params = params;
+        public void setParameters(Map<String, String> parameters) {
+            this.parameters = parameters;
         }
 
         public void setHeaders(Map<String, String> headers) {

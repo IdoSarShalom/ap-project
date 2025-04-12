@@ -2,9 +2,9 @@ package test;
 
 public interface HTTPServer extends Runnable {
 
-    void addServlet(String httpMethod, String path, Servlet s);
+    void addServlet(String httpCommand, String uri, Servlet s);
 
-    void removeServlet(String httpMethod, String path);
+    void removeServlet(String httpCommand, String uri);
 
     void start();
 
