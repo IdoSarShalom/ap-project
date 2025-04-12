@@ -9,73 +9,64 @@ import java.util.stream.Collectors;
 public class RequestParser {
 
     public static RequestInfo parseRequest(BufferedReader reader) throws IOException {
-        RequestInfo requestInfo = new RequestInfo();
-        readRequestLine(requestInfo, reader);
-        readHeaderLines(requestInfo, reader);
+        List<String> allLines = readAllLines(reader);
+        ListIterator<String> iterator = allLines.listIterator();
+        String[] requestLineParts = parseRequestLineParts(iterator);
+        String httpCommand = extractHttpCommand(requestLineParts);
+        String uri = extractUri(requestLineParts);
+        String resourceUri = extractResourceUri(uri);
+        String[] uriSegments = extractUriSegments(resourceUri);
+        Map<String, String> parameters = extractParameters(uri);
+        Map<String, String> headers = buildHeaders(iterator);
+        byte[] content = buildContentFromIterator(iterator, headers);
 
-        if (reader.ready()) {
-            String nextLine = reader.readLine();
-            if (nextLine != null && !nextLine.isEmpty()) {
-                if (isMetadataLine(nextLine)) {
-                    readMetadataLines(requestInfo, reader, nextLine);
-                }
-                readContentLines(requestInfo, reader, nextLine);
-            }
+        return new RequestInfo(httpCommand, uri, resourceUri, uriSegments, parameters, headers, content);
+    }
+
+    private static List<String> readAllLines(BufferedReader reader) throws IOException {
+        List<String> lines = new ArrayList<>();
+        String line;
+
+        while (reader.ready() && (line = reader.readLine()) != null) {
+            lines.add(line);
         }
-
-        return requestInfo;
+        return lines;
     }
 
-    private static void readRequestLine(RequestInfo requestInfo, BufferedReader reader) throws IOException {
-        String line = reader.readLine();
-        validateLineIsNotNull(line);
-
-        String[] firstLineParts = line.split("\\s+", 3);
-        validateThreePartsOfFirstLine(firstLineParts);
-
-        String httpCommand = firstLineParts[0].toUpperCase();
-        String uri = firstLineParts[1];
-        String resourceUri = getResourceUri(uri);
-        String[] resourceUriParts = getResourceUriParts(resourceUri);
-        String query = getQuery(uri);
-        Map<String, String> params = getParams(query);
-
-        setRequestInfo(requestInfo, httpCommand, uri, resourceUri, resourceUriParts, params);
+    private static String[] parseRequestLineParts(ListIterator<String> iterator) {
+        String line = getNextLine(iterator);
+        return splitRequestLine(line);
     }
 
-    private static boolean validateLineIsNotNull(String line) {
-        if (Objects.isNull(line)) {
-            throwInvalidRequestFormatException();
-        }
-        return true;
+    private static String getNextLine(ListIterator<String> iterator) {
+        return iterator.hasNext() ? iterator.next() : "";
     }
 
-    private static void throwInvalidRequestFormatException() {
-        throw new RuntimeException("The request does not match the expected format, unable to parse.");
+    private static String[] splitRequestLine(String line) {
+        return line.split("\\s+", 3);
     }
 
-    private static void validateThreePartsOfFirstLine(String[] firstLineParts) {
-        if (firstLineParts.length < 3) {
-            throwInvalidRequestFormatException();
-        }
+    private static String extractHttpCommand(String[] parts) {
+        return parts[0].toUpperCase();
     }
 
-    private static String getResourceUri(String uri) {
+    private static String extractUri(String[] parts) {
+        return parts.length > 1 ? parts[1] : "";
+    }
+
+    private static String extractResourceUri(String uri) {
         return uri.contains("?") ? uri.substring(0, uri.indexOf('?')) : uri;
     }
 
-    private static String[] getResourceUriParts(String resourceUri) {
+    private static String[] extractUriSegments(String resourceUri) {
         return Arrays.stream(resourceUri.split(File.separator))
                 .filter(part -> !part.isEmpty())
                 .toArray(String[]::new);
     }
 
-    private static String getQuery(String uri) {
-        return uri.contains("?") ? uri.substring(uri.indexOf('?') + 1) : "";
-    }
-
-    private static Map<String, String> getParams(String query) {
-        return (query == null || query.isEmpty())
+    private static Map<String, String> extractParameters(String uri) {
+        String query = uri.contains("?") ? uri.substring(uri.indexOf('?') + 1) : "";
+        return query.isEmpty()
                 ? new HashMap<>()
                 : Arrays.stream(query.split("&"))
                 .map(param -> param.split("=", 2))
@@ -84,191 +75,107 @@ public class RequestParser {
                         keyValuePair -> keyValuePair.length > 1 ? keyValuePair[1] : ""));
     }
 
-    private static void setRequestInfo(RequestInfo requestInfo, String httpCommand, String uri, String resourceUri,
-                                       String[] resourceUriParts, Map<String, String> params) {
-        requestInfo.setHttpCommand(httpCommand);
-        requestInfo.setUri(uri);
-        requestInfo.setResourceUri(resourceUri);
-        requestInfo.setUriSegments(resourceUriParts);
-        requestInfo.setParameters(params);
-    }
-
-    private static void readHeaderLines(RequestInfo requestInfo, BufferedReader reader) throws IOException {
+    private static Map<String, String> buildHeaders(ListIterator<String> iterator) {
         Map<String, String> headers = new LinkedHashMap<>();
-        String line;
 
-        while (reader.ready() && (line = reader.readLine()) != null && !line.isEmpty()) {
+        while (iterator.hasNext()) {
+            String line = iterator.next();
+            if (line.isEmpty()) {
+                break;
+            }
             String[] headerParts = line.split(":", 2);
             if (headerParts.length == 2) {
                 headers.put(headerParts[0].trim(), headerParts[1].trim());
             }
         }
-        requestInfo.setHeaders(headers);
+        return headers;
     }
 
-    private static boolean isMetadataLine(String line) {
-        String[] parts = line.split("=", 2);
-        return parts.length == 2 && !parts[0].trim().isEmpty() && !parts[1].trim().isEmpty();
-    }
+    private static byte[] buildContentFromIterator(ListIterator<String> iterator, Map<String, String> headers) {
+        StringBuilder contentBuilder = new StringBuilder();
+        String firstContentLine = null;
 
-    private static void readMetadataLines(RequestInfo requestInfo, BufferedReader reader, String line)
-            throws IOException {
-        Map<String, String> metadata = new HashMap<>();
-        parseMetadataLine(metadata, line);
-        String nextLine;
-
-        while (reader.ready() && (nextLine = reader.readLine()) != null && !nextLine.isEmpty()) {
-            parseMetadataLine(metadata, nextLine);
+        if (iterator.hasNext()) {
+            firstContentLine = iterator.next();
+            if (firstContentLine.isEmpty() && iterator.hasNext()) {
+                firstContentLine = iterator.next();
+            }
         }
-        requestInfo.setMetadata(metadata);
-    }
-
-    private static void parseMetadataLine(Map<String, String> metadata, String line) {
-        String[] parts = line.split("=", 2);
-        if (parts.length == 2) {
-            String key = parts[0].trim();
-            String value = parts[1].trim().replace("\"", "");
-            metadata.put(key, value);
+        if (firstContentLine != null && !firstContentLine.isEmpty()) {
+            contentBuilder.append(firstContentLine);
         }
-    }
 
-    private static void readContentLines(RequestInfo requestInfo, BufferedReader reader, String firstContentLine)
-            throws IOException {
-        Map<String, String> headers = requestInfo.getHeaders();
+        while (iterator.hasNext()) {
+            String line = iterator.next();
+            contentBuilder.append("\n").append(line);
+        }
+        String fullContent = contentBuilder.toString();
         String contentLengthStr = headers.get("Content-Length");
-
-        byte[] contentBytes;
         if (contentLengthStr != null) {
             int contentLength = Integer.parseInt(contentLengthStr);
-            contentBytes = readContentLength(reader, contentLength, firstContentLine);
-        } else {
-            contentBytes = readFullContent(reader, firstContentLine);
-        }
-
-        requestInfo.setContent(contentBytes);
-    }
-
-    private static byte[] readContentLength(BufferedReader reader, int contentLength, String line)
-            throws IOException {
-        if (contentLength < 1000) {
-            StringBuilder sb = new StringBuilder();
-
-            if (line != null && !line.isEmpty()) {
-                sb.append(line);
+            if (fullContent.length() > contentLength) {
+                fullContent = fullContent.substring(0, contentLength);
             }
-
-            char[] buffer = new char[1024];
-            int read;
-            while (reader.ready() && (read = reader.read(buffer)) != -1) {
-                sb.append(buffer, 0, read);
-                if (sb.length() >= contentLength) {
-                    break;
-                }
-            }
-
-            String content = sb.toString();
-            if (content.length() > contentLength) {
-                content = content.substring(0, contentLength);
-            }
-
-            return content.getBytes();
         }
-
-        char[] buffer = new char[contentLength];
-        int bufferedChars = Math.min(line.length(), contentLength);
-        line.getChars(0, bufferedChars, buffer, 0);
-        int read;
-
-        while (reader.ready() && bufferedChars < contentLength && (read = reader.read(buffer, bufferedChars, contentLength - bufferedChars)) != -1) {
-            bufferedChars += read;
-        }
-
-        return new String(buffer, 0, bufferedChars).getBytes();
-    }
-
-    private static byte[] readFullContent(BufferedReader reader, String line) throws IOException {
-        StringBuilder content = new StringBuilder();
-        content.append(line);
-
-        String nextLine;
-        while (reader.ready() && (nextLine = reader.readLine()) != null && !nextLine.isEmpty()) {
-            content.append(nextLine);
-        }
-
-        return content.toString().getBytes();
+        return fullContent.getBytes();
     }
 
     public static class RequestInfo {
-        private String httpCommand; // e.g. GET, POST, DELETE
-        private String uri; // e.g. /api/resource?id=123&name=test
-        private String resourceUri; // /api/resource
-        private String[] uriSegments; // e.g. "api, resource"
-        private Map<String, String> parameters; // e.g. {id=123, name=test}
-        private Map<String, String> headers;
-        private Map<String, String> metadata;
-        private byte[] content;
+        private final String httpCommand; // e.g. GET, POST, DELETE
+        private final String uri; // e.g. /api/resource?id=123&name=test
+        private final String resourceUri; // /api/resource
+        private final String[] uriSegments; // e.g. "api, resource"
+        private final Map<String, String> parameters; // e.g. {id=123, name=test}
+        private final Map<String, String> headers;
+        private final byte[] content;
 
         public RequestInfo() {
+            this.httpCommand = "";
+            this.uri = "";
+            this.resourceUri = "";
+            this.uriSegments = new String[0];
+            this.parameters = new HashMap<>();
+            this.headers = new HashMap<>();
+            this.content = new byte[0];
+        }
+
+        public RequestInfo(String httpCommand, String uri, String resourceUri, String[] uriSegments,
+                           Map<String, String> parameters, Map<String, String> headers, byte[] content) {
+            this.httpCommand = httpCommand != null ? httpCommand : "";
+            this.uri = uri != null ? uri : "";
+            this.resourceUri = resourceUri != null ? resourceUri : "";
+            this.uriSegments = uriSegments != null ? uriSegments : new String[0];
+            this.parameters = parameters != null ? parameters : new HashMap<>();
+            this.headers = headers != null ? headers : new HashMap<>();
+            this.content = content != null ? content : new byte[0];
         }
 
         public String getHttpCommand() {
-            return this.httpCommand;
+            return httpCommand;
         }
 
         public String getUri() {
-            return this.uri;
+            return uri;
         }
 
         public String getResourceUri() {
-            return this.resourceUri;
+            return resourceUri;
         }
 
         public String[] getUriSegments() {
-            return this.uriSegments;
+            return uriSegments;
         }
 
         public Map<String, String> getParameters() {
-            return this.parameters;
+            return parameters;
         }
 
         public Map<String, String> getHeaders() {
-            return this.headers;
+            return headers;
         }
 
         public byte[] getContent() {
-            return this.content;
-        }
-
-        public void setHttpCommand(String httpCommand) {
-            this.httpCommand = httpCommand;
-        }
-
-        public void setUri(String uri) {
-            this.uri = uri;
-        }
-
-        public void setResourceUri(String resourceUri) {
-            this.resourceUri = resourceUri;
-        }
-
-        public void setUriSegments(String[] uriSegments) {
-            this.uriSegments = uriSegments;
-        }
-
-        public void setParameters(Map<String, String> parameters) {
-            this.parameters = parameters;
-        }
-
-        public void setHeaders(Map<String, String> headers) {
-            this.headers = headers;
-        }
-
-        public void setMetadata(Map<String, String> metadata) {
-            this.metadata = metadata;
-        }
-
-        public void setContent(byte[] content) {
-            this.content = content;
+            return content;
         }
     }
 }
