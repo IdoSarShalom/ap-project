@@ -1,8 +1,6 @@
 package test;
 
 
-import configs.GenericConfig;
-
 public class App {
     public static void main(String[] args) {
         // Create our config
