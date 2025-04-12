@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class RequestParser {
 
@@ -16,7 +15,7 @@ public class RequestParser {
         String uri = extractUri(requestLineParts);
         String resourceUri = extractResourceUri(uri);
         String[] uriSegments = extractUriSegments(resourceUri);
-        Map<String, String> parameters = extractParameters(uri);
+        Map<String, Object> parameters = extractParameters(uri);
         Map<String, String> headers = buildHeaders(iterator);
         buildOtherParameters(iterator);
         byte[] content = buildContentFromIterator(iterator, headers);
@@ -65,15 +64,40 @@ public class RequestParser {
                 .toArray(String[]::new);
     }
 
-    private static Map<String, String> extractParameters(String uri) {
+    private static Map<String, Object> extractParameters(String uri) {
         String query = uri.contains("?") ? uri.substring(uri.indexOf('?') + 1) : "";
-        return query.isEmpty()
-                ? new HashMap<>()
-                : Arrays.stream(query.split("&"))
-                .map(param -> param.split("=", 2))
-                .collect(Collectors.toMap(
-                        keyValuePair -> keyValuePair[0],
-                        keyValuePair -> keyValuePair.length > 1 ? keyValuePair[1] : ""));
+        if (query.isEmpty()) return new HashMap<>();
+
+        Map<String, Object> parameters = new LinkedHashMap<>();
+
+        for (String param : query.split("&")) {
+            if (param.trim().isEmpty()) continue;
+            String[] keyValuePair = param.split("=", 2);
+            if (keyValuePair.length == 0 || keyValuePair[0].trim().isEmpty()) continue;
+            String key = keyValuePair[0].trim();
+            String value = keyValuePair.length > 1 ? keyValuePair[1].trim() : "";
+            try {
+                key = java.net.URLDecoder.decode(key, "UTF-8");
+                value = java.net.URLDecoder.decode(value, "UTF-8");
+            } catch (java.io.UnsupportedEncodingException e) {
+                // UTF-8 is always supported, but fallback to raw value if issue
+            }
+            Object typedValue = parseParameterValue(value);
+            parameters.put(key, typedValue);
+        }
+        return parameters;
+    }
+
+    private static Object parseParameterValue(String value) {
+        if (value.isEmpty()) return "";
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            // Not an integer, try boolean
+        }
+        if (value.equalsIgnoreCase("true")) return true;
+        if (value.equalsIgnoreCase("false")) return false;
+        return value;
     }
 
     private static Map<String, String> buildHeaders(ListIterator<String> iterator) {
@@ -103,15 +127,10 @@ public class RequestParser {
     }
 
     private static byte[] buildContentFromIterator(ListIterator<String> iterator, Map<String, String> headers) {
-        StringBuilder contentBuilder = new StringBuilder();
+        List<String> lines = new ArrayList<>();
+        iterator.forEachRemaining(lines::add);
 
-        while (iterator.hasNext()) {
-            String line = iterator.next();
-            contentBuilder.append(line).append("\n");
-        }
-        String fullContent = contentBuilder.toString();
-
-        return fullContent.getBytes();
+        return String.join("\n", lines).getBytes();
     }
 
     public static class RequestInfo {
@@ -119,12 +138,12 @@ public class RequestParser {
         private final String uri; // e.g. /api/resource?id=123&name=test
         private final String resourceUri; // /api/resource
         private final String[] uriSegments; // e.g. "api, resource"
-        private final Map<String, String> parameters; // e.g. {id=123, name=test}
+        private final Map<String, Object> parameters; // e.g. {id=123, name=test}
         private final Map<String, String> headers;
         private final byte[] content;
 
         public RequestInfo(String httpCommand, String uri, String resourceUri, String[] uriSegments,
-                           Map<String, String> parameters, Map<String, String> headers, byte[] content) {
+                           Map<String, Object> parameters, Map<String, String> headers, byte[] content) {
             this.httpCommand = httpCommand;
             this.uri = uri;
             this.resourceUri = resourceUri;
@@ -150,7 +169,7 @@ public class RequestParser {
             return uriSegments;
         }
 
-        public Map<String, String> getParameters() {
+        public Map<String, Object> getParameters() {
             return parameters;
         }
 
