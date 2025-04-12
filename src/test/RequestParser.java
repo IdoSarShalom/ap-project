@@ -129,25 +129,15 @@ public class RequestParser {
         private final Map<String, String> headers;
         private final byte[] content;
 
-        public RequestInfo() {
-            this.httpCommand = "";
-            this.uri = "";
-            this.resourceUri = "";
-            this.uriSegments = new String[0];
-            this.parameters = new HashMap<>();
-            this.headers = new HashMap<>();
-            this.content = new byte[0];
-        }
-
         public RequestInfo(String httpCommand, String uri, String resourceUri, String[] uriSegments,
                            Map<String, String> parameters, Map<String, String> headers, byte[] content) {
-            this.httpCommand = httpCommand != null ? httpCommand : "";
-            this.uri = uri != null ? uri : "";
-            this.resourceUri = resourceUri != null ? resourceUri : "";
-            this.uriSegments = uriSegments != null ? uriSegments : new String[0];
-            this.parameters = parameters != null ? parameters : new HashMap<>();
-            this.headers = headers != null ? headers : new HashMap<>();
-            this.content = content != null ? content : new byte[0];
+            this.httpCommand = httpCommand;
+            this.uri = uri;
+            this.resourceUri = resourceUri;
+            this.uriSegments = uriSegments;
+            this.parameters = parameters;
+            this.headers = headers;
+            this.content = content;
         }
 
         public String getHttpCommand() {
