@@ -80,18 +80,17 @@ public class GenericConfig implements Config {
     }
 
     private void validateAgentType(String agentType, int index) {
+        if (!agentType.equals(agentType.trim())) {
+            throw new RuntimeException("Agent type line " + (index * 3 + 1) + " has leading or trailing spaces: '" + agentType + "'");
+        }
 
-        if (agentType.chars().filter(ch -> ch == '.').count() < 2) {
-            throw new RuntimeException("Agent type line " + (index * 3 + 1) + " does not specify a valid package structure (requires at least two dots): '" + agentType + "'");
+        if (!agentType.contains(".")) {
+            throw new RuntimeException("Agent type line " + (index * 3 + 1) + " does not specify a valid package structure: '" + agentType + "'");
         }
         String className = extractClassName(agentType);
 
-        if (!className.equals(className.trim())) {
-            throw new RuntimeException("Agent type line " + (index * 3 + 1) + " has leading or trailing spaces in class name: '" + className + "'");
-        }
-
         try {
-            Class<?> agentClass = Class.forName(className);
+            Class<?> agentClass = Class.forName(agentType);
             if (!Agent.class.isAssignableFrom(agentClass)) {
                 throw new RuntimeException("Class " + className + " at line " + (index * 3 + 1) + " does not implement Agent interface.");
             }
@@ -126,17 +125,16 @@ public class GenericConfig implements Config {
             String agentType = agentTypes.get(i);
             String subsLine = subscriptionLines.get(i);
             String pubsLine = publicationLines.get(i);
-            String className = extractClassName(agentType);
             String[] subs = parseTopics(subsLine);
             String[] pubs = parseTopics(pubsLine);
-            Agent agent = createAgentInstance(className, subs, pubs);
+            Agent agent = createAgentInstance(agentType, subs, pubs);
             ParallelAgent parallelAgent = new ParallelAgent(agent, 10);
             instantiatedAgents.add(parallelAgent);
         }
     }
 
     private String extractClassName(String agentType) {
-        return agentType.substring(agentType.indexOf(".") + 1);
+        return agentType.substring(agentType.lastIndexOf(".") + 1);
     }
 
     private String[] parseTopics(String line) {
