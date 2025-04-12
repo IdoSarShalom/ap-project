@@ -10,11 +10,11 @@ import java.util.List;
 
 public class GenericConfig implements Config {
 
-    private String configFilePath;
     private final List<Agent> instantiatedAgents = new ArrayList<>();
     private final List<String> agentTypes = new ArrayList<>();
     private final List<String> subscriptionLines = new ArrayList<>();
     private final List<String> publicationLines = new ArrayList<>();
+    private String configFilePath;
 
     public void create() {
         ensureConfigFileIsSet();
@@ -147,7 +147,8 @@ public class GenericConfig implements Config {
             Class<?> agentClass = Class.forName(className);
             Constructor<?> constructor = agentClass.getConstructor(String[].class, String[].class);
             return (Agent) constructor.newInstance(subs, pubs);
-        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException |
+                 InvocationTargetException e) {
             throw new RuntimeException("Failed to instantiate agent: " + className, e);
         }
     }
