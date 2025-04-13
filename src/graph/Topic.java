@@ -1,4 +1,6 @@
-package test;
+package graph;
+
+import configs.Agent;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
