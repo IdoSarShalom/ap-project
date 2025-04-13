@@ -15,9 +15,9 @@ public class RequestParser {
         String uri = extractUri(requestLineParts);
         String resourceUri = extractResourceUri(uri);
         String[] uriSegments = extractUriSegments(resourceUri);
-        Map<String, Object> parameters = extractParameters(uri);
+        Map<String, String> parameters = extractParameters(uri);
         Map<String, String> headers = buildHeaders(iterator);
-        buildOtherParameters(iterator);
+        buildOtherParameters(iterator, parameters);
         byte[] content = buildContentFromIterator(iterator, headers);
 
         return new RequestInfo(httpCommand, uri, resourceUri, uriSegments, parameters, headers, content);
@@ -64,40 +64,22 @@ public class RequestParser {
                 .toArray(String[]::new);
     }
 
-    private static Map<String, Object> extractParameters(String uri) {
+    private static Map<String, String> extractParameters(String uri) {
         String query = uri.contains("?") ? uri.substring(uri.indexOf('?') + 1) : "";
         if (query.isEmpty()) return new HashMap<>();
 
-        Map<String, Object> parameters = new LinkedHashMap<>();
+        Map<String, String> parameters = new LinkedHashMap<>();
 
         for (String param : query.split("&")) {
             if (param.trim().isEmpty()) continue;
-            String[] keyValuePair = param.split("=", 2);
-            if (keyValuePair.length == 0 || keyValuePair[0].trim().isEmpty()) continue;
-            String key = keyValuePair[0].trim();
-            String value = keyValuePair.length > 1 ? keyValuePair[1].trim() : "";
-            try {
-                key = java.net.URLDecoder.decode(key, "UTF-8");
-                value = java.net.URLDecoder.decode(value, "UTF-8");
-            } catch (java.io.UnsupportedEncodingException e) {
-                // UTF-8 is always supported, but fallback to raw value if issue
-            }
-            Object typedValue = parseParameterValue(value);
-            parameters.put(key, typedValue);
-        }
-        return parameters;
-    }
 
-    private static Object parseParameterValue(String value) {
-        if (value.isEmpty()) return "";
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            // Not an integer, try boolean
+            String[] keyValuePair = param.split("=", 2);
+            if (hasInvalidKey(keyValuePair)) continue;
+
+            addParameter(keyValuePair, parameters);
         }
-        if (value.equalsIgnoreCase("true")) return true;
-        if (value.equalsIgnoreCase("false")) return false;
-        return value;
+
+        return parameters;
     }
 
     private static Map<String, String> buildHeaders(ListIterator<String> iterator) {
@@ -116,14 +98,39 @@ public class RequestParser {
         return headers;
     }
 
-    private static void buildOtherParameters(ListIterator<String> iterator) {
-
+    private static void buildOtherParameters(ListIterator<String> iterator, Map<String, String> parameters) {
         while (iterator.hasNext()) {
-            String line = iterator.next();
-            if (line.isEmpty()) {
+            if (processNextParameterLine(iterator, parameters)) {
                 break;
             }
         }
+    }
+
+    private static boolean processNextParameterLine(ListIterator<String> iterator, Map<String, String> parameters) {
+        String line = getNextLine(iterator);
+        if (line.isEmpty()) {
+            return true;
+        }
+        String[] keyValuePair = splitParameterLine(line);
+        if (hasInvalidKey(keyValuePair)) {
+            return false;
+        }
+        addParameter(keyValuePair, parameters);
+        return false;
+    }
+
+    private static String[] splitParameterLine(String line) {
+        return line.split("=", 2);
+    }
+
+    private static boolean hasInvalidKey(String[] keyValuePair) {
+        return keyValuePair.length == 0 || keyValuePair[0].trim().isEmpty();
+    }
+
+    private static void addParameter(String[] keyValuePair, Map<String, String> parameters) {
+        String key = keyValuePair[0].trim();
+        String value = keyValuePair.length > 1 ? keyValuePair[1].trim() : "";
+        parameters.put(key, value);
     }
 
     private static byte[] buildContentFromIterator(ListIterator<String> iterator, Map<String, String> headers) {
@@ -134,16 +141,16 @@ public class RequestParser {
     }
 
     public static class RequestInfo {
-        private final String httpCommand; // e.g. GET, POST, DELETE
-        private final String uri; // e.g. /api/resource?id=123&name=test
-        private final String resourceUri; // /api/resource
-        private final String[] uriSegments; // e.g. "api, resource"
-        private final Map<String, Object> parameters; // e.g. {id=123, name=test}
+        private final String httpCommand;
+        private final String uri;
+        private final String resourceUri;
+        private final String[] uriSegments;
+        private final Map<String, String> parameters;
         private final Map<String, String> headers;
         private final byte[] content;
 
         public RequestInfo(String httpCommand, String uri, String resourceUri, String[] uriSegments,
-                           Map<String, Object> parameters, Map<String, String> headers, byte[] content) {
+                           Map<String, String> parameters, Map<String, String> headers, byte[] content) {
             this.httpCommand = httpCommand;
             this.uri = uri;
             this.resourceUri = resourceUri;
@@ -169,7 +176,7 @@ public class RequestParser {
             return uriSegments;
         }
 
-        public Map<String, Object> getParameters() {
+        public Map<String, String> getParameters() {
             return parameters;
         }
 
