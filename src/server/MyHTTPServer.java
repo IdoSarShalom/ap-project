@@ -39,6 +39,7 @@ public class MyHTTPServer extends Thread implements HTTPServer {
     @Override
     public void addServlet(String httpCommand, String uri, Servlet s) {
         Map<String, Servlet> servletMap = getServletMap(httpCommand.toUpperCase());
+
         if (servletMap != null) {
             servletMap.put(uri, s);
         }
@@ -47,6 +48,7 @@ public class MyHTTPServer extends Thread implements HTTPServer {
     @Override
     public void removeServlet(String httpCommand, String uri) {
         Map<String, Servlet> servletMap = getServletMap(httpCommand.toUpperCase());
+
         if (servletMap != null) {
             closeAndRemoveServlet(servletMap, uri);
         }
@@ -89,18 +91,17 @@ public class MyHTTPServer extends Thread implements HTTPServer {
     }
 
     private Map<String, Servlet> getServletMap(String httpCommand) {
-        if (httpCommand.equals("GET")) {
-            return getUriToServletMap;
-        } else if (httpCommand.equals("POST")) {
-            return postUriToServletMap;
-        } else if (httpCommand.equals("DELETE")) {
-            return deleteUriToServletMap;
-        }
-        return null;
+        return switch (httpCommand) {
+            case "GET" -> getUriToServletMap;
+            case "POST" -> postUriToServletMap;
+            case "DELETE" -> deleteUriToServletMap;
+            default -> null;
+        };
     }
 
     private void closeAndRemoveServlet(Map<String, Servlet> servletMap, String uri) {
         Servlet servlet = servletMap.remove(uri);
+
         if (servlet != null) {
             try {
                 servlet.close();
@@ -136,35 +137,43 @@ public class MyHTTPServer extends Thread implements HTTPServer {
 
     private void processClientRequest(BufferedReader br, OutputStream out) throws IOException {
         RequestParser.RequestInfo ri = RequestParser.parseRequest(br);
+
         if (ri == null) {
             writeBadRequest(out, "Malformed request");
             return;
         }
+
         Servlet servlet = findServlet(ri.getHttpCommand(), ri.getResourceUri());
+
         if (servlet == null) {
             writeNotFound(out, "No servlet for " + ri.getHttpCommand() + " " + ri.getResourceUri());
             return;
         }
+
         servlet.handle(ri, out);
     }
 
     private Servlet findServlet(String httpCommand, String uri) {
-        Map<String, Servlet> servletMap = getServletMap(httpCommand.toUpperCase());
+        Map<String, Servlet> servletMap = getServletMap(httpCommand);
+
         if (servletMap == null) {
             return null;
         }
+
         return matchServletToUri(uri, servletMap);
     }
 
     private Servlet matchServletToUri(String uri, Map<String, Servlet> uriToServlet) {
         Servlet matchingServlet = null;
         int longestPrefixLength = -1;
+
         for (String currentUri : uriToServlet.keySet()) {
             if (uri.startsWith(currentUri) && currentUri.length() > longestPrefixLength) {
                 longestPrefixLength = currentUri.length();
                 matchingServlet = uriToServlet.get(currentUri);
             }
         }
+
         return matchingServlet;
     }
 
@@ -180,6 +189,7 @@ public class MyHTTPServer extends Thread implements HTTPServer {
 
     private void stopServer() {
         running = false;
+
         if (serverSocket != null) {
             try {
                 serverSocket.close();
@@ -204,6 +214,7 @@ public class MyHTTPServer extends Thread implements HTTPServer {
     private void closeExecutor() {
         if (executor != null) {
             executor.shutdownNow();
+
             try {
                 executor.awaitTermination(3, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
