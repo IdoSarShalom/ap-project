@@ -141,11 +141,11 @@ public class RequestParser {
     }
 
     public static class RequestInfo {
-        private final String httpCommand;
-        private final String uri;
-        private final String resourceUri;
-        private final String[] uriSegments;
-        private final Map<String, String> parameters;
+        private final String httpCommand; // e.g. GET, POST, DELETE
+        private final String uri; // e.g. /api/resource?id=123&name=test
+        private final String resourceUri; // /api/resource
+        private final String[] uriSegments; // e.g. "api, resource"
+        private final Map<String, String> parameters; // e.g. {id=123, name=test, filename=hello_world.txt}
         private final Map<String, String> headers;
         private final byte[] content;
 
