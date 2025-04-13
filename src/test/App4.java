@@ -1,7 +1,7 @@
 package test;
 
 
-public class App {
+public class App4 {
     public static void main(String[] args) {
         // Create our config
         GenericConfig config = new GenericConfig();
