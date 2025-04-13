@@ -11,7 +11,7 @@ public class TopicDisplayer implements Servlet {
     @Override
     public void handle(RequestParser.RequestInfo ri, OutputStream toClient) throws IOException {
         publishMessage(ri);
-        sendRedirectResponse(toClient);
+        sendResponse(toClient);
     }
 
     private void publishMessage(RequestParser.RequestInfo ri) {
@@ -21,15 +21,24 @@ public class TopicDisplayer implements Servlet {
         tm.getTopic(topic).publish(new Message(message));
     }
 
-    private void sendRedirectResponse(OutputStream toClient) throws IOException {
-        String response = buildRedirectResponse();
-        toClient.write(response.getBytes());
+    private void sendResponse(OutputStream toClient) throws IOException {
+
+        // TODO: invoke HTMLLoader perhaps after calculating the graph via HtmlGraphWriter
+
+        String htmlResponse = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html\r\n" +
+                "Connection: close\r\n\r\n" +
+                "<html><body><h1>Message Published</h1>" +
+                "<a href='/app/'>Go back to app</a>" +
+                "</body></html>";
+
+        toClient.write(htmlResponse.getBytes());
     }
 
     private String buildRedirectResponse() {
-        return "HTTP/1.1 303 See Other\r\n"
-                + "Location: /app/\r\n"
-                + "Connection: close\r\n\r\n";
+        return "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html\r\n" +
+                "Connection: close\r\n\r\n";
     }
 
     @Override
