@@ -155,11 +155,6 @@ public class MyHTTPServer extends Thread implements HTTPServer {
 
     private Servlet findServlet(String httpCommand, String uri) {
         Map<String, Servlet> servletMap = getServletMap(httpCommand);
-
-        if (servletMap == null) {
-            return null;
-        }
-
         return matchServletToUri(uri, servletMap);
     }
 
