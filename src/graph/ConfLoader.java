@@ -10,26 +10,26 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 public class ConfLoader implements Servlet {
-
     private static final String TEMP_UPLOAD_PATH = "uploaded.conf";
+    private static final String GRAPH_HTML_PATH = "html/index.html";
 
     @Override
-    public void handle(RequestParser.RequestInfo ri, OutputStream toClient) throws IOException {
-        String content = extractConfigContent(ri);
-        saveConfigToFile(content);
+    public void handle(RequestParser.RequestInfo requestInfo, OutputStream clientOutput) throws IOException {
+        String configContent = extractConfigContent(requestInfo);
+        saveConfigToFile(configContent);
         clearTopicManager();
-        GenericConfig config = createConfig();
+        createConfigFromFile();
+        generateGraphVisualization();
+        redirectToGraphView(clientOutput);
     }
 
-    private String extractConfigContent(RequestParser.RequestInfo ri) {
-        return new String(ri.getContent(), StandardCharsets.UTF_8);
+    private String extractConfigContent(RequestParser.RequestInfo requestInfo) {
+        return new String(requestInfo.getContent(), StandardCharsets.UTF_8);
     }
 
-    private void saveConfigToFile(String content) {
+    private void saveConfigToFile(String content) throws IOException {
         try (FileWriter writer = new FileWriter(TEMP_UPLOAD_PATH)) {
             writer.write(content);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -37,11 +37,23 @@ public class ConfLoader implements Servlet {
         TopicManagerSingleton.get().clear();
     }
 
-    private GenericConfig createConfig() {
+    private void createConfigFromFile() {
         GenericConfig config = new GenericConfig();
         config.setConfFile(TEMP_UPLOAD_PATH);
         config.create();
-        return config;
+    }
+
+    private void generateGraphVisualization() throws IOException {
+        Graph graph = new Graph();
+        graph.createFromTopics();
+        HtmlGraphWriter.getGraphHTML(graph, GRAPH_HTML_PATH);
+    }
+
+    private void redirectToGraphView(OutputStream clientOutput) throws IOException {
+        String redirectResponse = "HTTP/1.1 302 Found\r\n" +
+                "Location: /app/index.html\r\n" +
+                "Connection: close\r\n\r\n";
+        clientOutput.write(redirectResponse.getBytes());
     }
 
     @Override
