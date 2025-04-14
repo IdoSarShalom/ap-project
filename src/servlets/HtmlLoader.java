@@ -9,40 +9,60 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class HtmlLoader implements Servlet {
-    private final String rootDirectory;
 
-    public HtmlLoader(String rootDirectory) {
-        this.rootDirectory = rootDirectory;
+    private final String htmlDirectory;
+
+    public HtmlLoader(String htmlDirectory) {
+        this.htmlDirectory = htmlDirectory;
     }
 
     @Override
     public void handle(RequestParser.RequestInfo requestInfo, OutputStream clientOutput) throws IOException {
-        String relativePath = getRelativePath(requestInfo.getUri());
-        Path filePath = resolveFilePath(relativePath);
-        writeResponse(clientOutput, filePath);
+        String requestedFile = extractFileName(requestInfo.getUri());
+        Path filePath = mapToFilePath(requestedFile);
+
+        if (!Files.exists(filePath) || Files.isDirectory(filePath)) {
+            sendFileNotFound(clientOutput, "File not found: " + requestedFile);
+            return;
+        }
+
+        sendFileResponse(clientOutput, filePath);
     }
 
-    private String getRelativePath(String uri) {
+    private String extractFileName(String uri) {
+        if (uri.equals("/app/")) {
+            return "index.html";
+        }
+
         return uri.substring("/app/".length());
     }
 
-    private Path resolveFilePath(String relativePath) {
-        return Paths.get(rootDirectory, relativePath);
+    private Path mapToFilePath(String fileName) {
+        return Paths.get(htmlDirectory, fileName);
     }
 
-    private void writeResponse(OutputStream clientOutput, Path filePath) throws IOException {
-        writeResponseHeader(clientOutput);
+    private void sendFileResponse(OutputStream clientOutput, Path filePath) throws IOException {
+        sendResponseHeader(clientOutput);
         streamFileContent(clientOutput, filePath);
     }
 
-    private void writeResponseHeader(OutputStream clientOutput) throws IOException {
-        String header = createResponseHeader();
+    private void sendResponseHeader(OutputStream clientOutput) throws IOException {
+        String header = buildResponseHeader();
         clientOutput.write(header.getBytes());
     }
 
-    private String createResponseHeader() {
-        return "HTTP/1.1 200 OK\r\n"
-                + "Connection: close\r\n\r\n";
+    private String buildResponseHeader() {
+        return "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html\r\n" +
+                "Connection: close\r\n\r\n";
+    }
+
+    private void sendFileNotFound(OutputStream clientOutput, String message) throws IOException {
+        String response = "HTTP/1.1 404 Not Found\r\n" +
+                "Content-Type: text/plain\r\n" +
+                "Connection: close\r\n\r\n" +
+                message;
+        clientOutput.write(response.getBytes());
     }
 
     private void streamFileContent(OutputStream clientOutput, Path filePath) throws IOException {
