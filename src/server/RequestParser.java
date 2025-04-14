@@ -17,7 +17,6 @@ public class RequestParser {
         String[] uriSegments = extractUriSegments(resourceUri);
         Map<String, String> parameters = extractParameters(uri);
         Map<String, String> headers = buildHeaders(iterator);
-        buildOtherParameters(iterator, parameters);
         byte[] content = buildContentFromIterator(iterator, headers);
 
         return new RequestInfo(httpCommand, uri, resourceUri, uriSegments, parameters, headers, content);
