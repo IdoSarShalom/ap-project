@@ -24,6 +24,9 @@ public class TopicDisplayer implements Servlet {
     private void sendResponse(OutputStream toClient) throws IOException {
 
         // TODO: invoke HTMLLoader perhaps after calculating the graph via HtmlGraphWriter
+        // Do this by invoking /app/ with the corresponding file e.g. index.html
+        // after preparing this file for the user
+
 
         String htmlResponse = "HTTP/1.1 200 OK\r\n" +
                 "Content-Type: text/html\r\n" +
