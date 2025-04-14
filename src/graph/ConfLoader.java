@@ -3,6 +3,7 @@ package graph;
 import configs.GenericConfig;
 import server.RequestParser;
 import servlets.Servlet;
+import views.HtmlGraphWriter;
 
 import java.io.FileWriter;
 import java.io.IOException;

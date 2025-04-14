@@ -1,6 +1,7 @@
-package graph;
+package views;
 
 import configs.Node;
+import graph.Graph;
 
 import java.io.FileWriter;
 import java.io.IOException;
