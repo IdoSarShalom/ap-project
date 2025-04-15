@@ -1,7 +1,6 @@
 package server;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -58,7 +57,7 @@ public class RequestParser {
     }
 
     private static String[] extractUriSegments(String resourceUri) {
-        return Arrays.stream(resourceUri.split(File.separator))
+        return Arrays.stream(resourceUri.split("/"))
                 .filter(part -> !part.isEmpty())
                 .toArray(String[]::new);
     }
