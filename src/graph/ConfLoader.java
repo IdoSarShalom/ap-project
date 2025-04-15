@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 
 public class ConfLoader implements Servlet {
     private static final String TEMP_UPLOAD_PATH = "uploaded.conf";
-    private static final String GRAPH_HTML_PATH = "html/index.html";
+    private static final String GRAPH_HTML_PATH = "web/index.html";
 
     @Override
     public void handle(RequestParser.RequestInfo requestInfo, OutputStream clientOutput) throws IOException {
