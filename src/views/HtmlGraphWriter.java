@@ -4,6 +4,8 @@ import configs.Node;
 import graph.Graph;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,22 +14,12 @@ import java.util.Map;
 public class HtmlGraphWriter {
 
     public static String getGraphHTML(Graph graph) throws IOException {
+        System.out.println("graph is " + graph);
         String graphJson = toCytoscapeJson(graph);
-        return "<html>\n" +
-                "<head>\n" +
-                "  <script src=\"cytoscape.js\"></script>\n" +
-                "</head>\n" +
-                "<body>\n" +
-                "  <div id=\"cy\"></div>\n" +
-                "  <script>\n" +
-                "    var elements = " + graphJson + ";\n" +
-                "    var cy = cytoscape({\n" +
-                "      container: document.getElementById('cy'),\n" +
-                "      elements: elements\n" +
-                "    });\n" +
-                "  </script>\n" +
-                "</body>\n" +
-                "</html>";
+        final String filePath = "web/graph.html";
+        String template = Files.readString(Paths.get(filePath));
+
+        return template;
     }
 
     private static String toCytoscapeJson(Graph graph) {
