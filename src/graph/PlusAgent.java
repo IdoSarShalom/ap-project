@@ -1,23 +1,31 @@
-package test;
+package graph;
 
-public class IncAgent implements Agent {
+import configs.Agent;
+
+public class PlusAgent implements Agent {
 
     private final String[] subscribedTopics;
     private final String[] publishedTopics;
     private final TopicManagerSingleton.TopicManager topicManager;
+    private Double firstOperand;
+    private Double secondOperand;
 
-    public IncAgent(String[] subscribedTopics, String[] publishedTopics) {
+    public PlusAgent(String[] subscribedTopics, String[] publishedTopics) {
         this.subscribedTopics = subscribedTopics;
         this.publishedTopics = publishedTopics;
         this.topicManager = TopicManagerSingleton.get();
 
         initializeSubscriptions();
         initializePublications();
+        resetOperands();
     }
 
     private void initializeSubscriptions() {
         if (subscribedTopics.length > 0) {
             topicManager.getTopic(subscribedTopics[0]).subscribe(this);
+        }
+        if (subscribedTopics.length > 1) {
+            topicManager.getTopic(subscribedTopics[1]).subscribe(this);
         }
     }
 
@@ -27,6 +35,11 @@ public class IncAgent implements Agent {
         }
     }
 
+    private void resetOperands() {
+        this.firstOperand = 0.0;
+        this.secondOperand = 0.0;
+    }
+
     @Override
     public String getName() {
         return getClass().getSimpleName();
@@ -34,27 +47,43 @@ public class IncAgent implements Agent {
 
     @Override
     public void reset() {
-        // No state to reset in this agent
+        resetOperands();
     }
 
     @Override
     public void callback(String topic, Message msg) {
-        if (Double.isNaN(msg.asDouble)) {
+        double messageValue = msg.asDouble;
+
+        if (Double.isNaN(messageValue)) {
             return;
         }
 
-        if (hasPublishedTopics()) {
-            publishIncrementedValue(msg.asDouble);
+        updateOperand(topic, messageValue);
+
+        if (areBothOperandsSet() && hasPublishedTopics()) {
+            publishResult();
         }
+    }
+
+    private void updateOperand(String topic, double messageValue) {
+        if (subscribedTopics.length > 0 && topic.equals(subscribedTopics[0])) {
+            firstOperand = messageValue;
+        } else if (subscribedTopics.length > 1 && topic.equals(subscribedTopics[1])) {
+            secondOperand = messageValue;
+        }
+    }
+
+    private boolean areBothOperandsSet() {
+        return firstOperand != null && secondOperand != null;
     }
 
     private boolean hasPublishedTopics() {
         return publishedTopics.length > 0;
     }
 
-    private void publishIncrementedValue(double originalValue) {
-        double incrementedValue = originalValue + 1.0;
-        topicManager.getTopic(publishedTopics[0]).publish(new Message(incrementedValue));
+    private void publishResult() {
+        double result = firstOperand + secondOperand;
+        topicManager.getTopic(publishedTopics[0]).publish(new Message(result));
     }
 
     @Override
@@ -66,6 +95,9 @@ public class IncAgent implements Agent {
     private void unsubscribeFromTopics() {
         if (subscribedTopics.length > 0) {
             topicManager.getTopic(subscribedTopics[0]).unsubscribe(this);
+        }
+        if (subscribedTopics.length > 1) {
+            topicManager.getTopic(subscribedTopics[1]).unsubscribe(this);
         }
     }
 

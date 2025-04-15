@@ -1,4 +1,6 @@
-package test;
+package configs;
+
+import graph.Message;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;

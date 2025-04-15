@@ -1,4 +1,7 @@
-package test;
+package graph;
+
+import configs.Agent;
+import configs.Node;
 
 import java.util.ArrayList;
 import java.util.Map;

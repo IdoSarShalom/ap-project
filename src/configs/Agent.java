@@ -1,4 +1,6 @@
-package test;
+package configs;
+
+import graph.Message;
 
 public interface Agent {
     String getName();
