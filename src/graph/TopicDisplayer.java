@@ -14,7 +14,7 @@ public class TopicDisplayer implements Servlet {
     public void handle(RequestParser.RequestInfo requestInfo, OutputStream clientOutput) throws IOException {
         publishMessage(requestInfo);
         generateGraphVisualization();
-        sendResponse(clientOutput);
+        redirectToGraphView(clientOutput);
     }
 
     private void publishMessage(RequestParser.RequestInfo requestInfo) {
@@ -30,7 +30,7 @@ public class TopicDisplayer implements Servlet {
         HtmlGraphWriter.getGraphHTML(graph, GRAPH_HTML_PATH);
     }
 
-    private void sendResponse(OutputStream clientOutput) throws IOException {
+    private void redirectToGraphView(OutputStream clientOutput) throws IOException {
         String redirectResponse = "HTTP/1.1 302 Found\r\n" +
                 "Location: /app/index.html\r\n" +
                 "Connection: close\r\n\r\n";
