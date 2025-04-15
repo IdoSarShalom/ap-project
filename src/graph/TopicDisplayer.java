@@ -13,8 +13,8 @@ public class TopicDisplayer implements Servlet {
     @Override
     public void handle(RequestParser.RequestInfo requestInfo, OutputStream clientOutput) throws IOException {
         publishMessage(requestInfo);
-        generateGraphVisualization();
-        redirectToGraphView(clientOutput);
+        String graphHtml = generateGraphVisualization();
+        sendGraphResponse(clientOutput, graphHtml);
     }
 
     private void publishMessage(RequestParser.RequestInfo requestInfo) {
@@ -24,17 +24,22 @@ public class TopicDisplayer implements Servlet {
         topicManager.getTopic(topic).publish(new Message(message));
     }
 
-    private void generateGraphVisualization() throws IOException {
+    private String generateGraphVisualization() throws IOException {
         Graph graph = new Graph();
         graph.createFromTopics();
-        HtmlGraphWriter.getGraphHTML(graph, GRAPH_HTML_PATH);
+        return HtmlGraphWriter.getGraphHTML(graph);
     }
 
-    private void redirectToGraphView(OutputStream clientOutput) throws IOException {
-        String redirectResponse = "HTTP/1.1 302 Found\r\n" +
-                "Location: /app/index.html\r\n" +
-                "Connection: close\r\n\r\n";
-        clientOutput.write(redirectResponse.getBytes());
+    private void sendGraphResponse(OutputStream clientOutput, String graphHtml) throws IOException {
+        String header = buildResponseHeader(graphHtml);
+        clientOutput.write(header.getBytes());
+    }
+
+    private String buildResponseHeader(String graphHtml) {
+        return "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html\r\n" +
+                "Connection: close\r\n\r\n" +
+                graphHtml;
     }
 
     @Override

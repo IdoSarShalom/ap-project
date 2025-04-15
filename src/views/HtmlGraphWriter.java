@@ -3,7 +3,6 @@ package views;
 import configs.Node;
 import graph.Graph;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,9 +11,9 @@ import java.util.Map;
 
 public class HtmlGraphWriter {
 
-    public static void getGraphHTML(Graph graph, String filePath) throws IOException {
+    public static String getGraphHTML(Graph graph) throws IOException {
         String graphJson = toCytoscapeJson(graph);
-        String htmlContent = "<html>\n" +
+        return "<html>\n" +
                 "<head>\n" +
                 "  <script src=\"cytoscape.js\"></script>\n" +
                 "</head>\n" +
@@ -29,37 +28,30 @@ public class HtmlGraphWriter {
                 "  </script>\n" +
                 "</body>\n" +
                 "</html>";
-        try (FileWriter writer = new FileWriter(filePath)) {
-            writer.write(htmlContent);
-        }
     }
 
     private static String toCytoscapeJson(Graph graph) {
-        List<Map<String, Map<String, Object>>> nodes = new ArrayList<>();
-        List<Map<String, Map<String, Object>>> edges = new ArrayList<>();
+        List<Map<String, Object>> nodes = new ArrayList<>();
+        List<Map<String, Object>> edges = new ArrayList<>();
 
         for (Node node : graph) {
-            Map<String, Object> data = new HashMap<>();
-            data.put("id", node.getName());
-            data.put("label", node.getName());
+            Map<String, Object> nodeObj = new HashMap<>();
+            nodeObj.put("id", node.getName());
+            nodeObj.put("label", node.getName());
             if (node.getName().startsWith("T")) {
-                data.put("value", 0.0); // Placeholder; replace with actual topic value
+                nodeObj.put("value", 0.0);
             }
-            Map<String, Map<String, Object>> nodeObj = new HashMap<>();
-            nodeObj.put("data", data);
             nodes.add(nodeObj);
         }
 
         for (Node node : graph) {
             for (Node neighbor : node.getEdges()) {
-                Map<String, Object> data = new HashMap<>();
-                data.put("source", node.getName());
-                data.put("target", neighbor.getName());
+                Map<String, Object> edgeObj = new HashMap<>();
+                edgeObj.put("from", node.getName());
+                edgeObj.put("to", neighbor.getName());
                 if (node.getName().startsWith("A") && neighbor.getName().startsWith("T")) {
-                    data.put("weight", 0.0); // Placeholder; replace with actual weight
+                    edgeObj.put("weight", 0.0); // Placeholder; replace with actual weight
                 }
-                Map<String, Map<String, Object>> edgeObj = new HashMap<>();
-                edgeObj.put("data", data);
                 edges.add(edgeObj);
             }
         }

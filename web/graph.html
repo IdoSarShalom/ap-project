@@ -1,10 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Graph Visualization</title>
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <meta charset="UTF-8">
+  <title>Graph Visualization</title>
+  <link href="https://unpkg.com/vis-network/styles/vis-network.css" rel="stylesheet" />
+  <style>
+    #network {
+        width: 600px;
+        height: 400px;
+        border: 1px solid lightgray;
+    }
+  </style>
 </head>
 <body>
-<h1>No configuration uploaded yet</h1>
+<div id="network"></div>
+
+<script>
+
+
+  const graphData = {
+      nodes: [
+          { id: 1, label: "Node 1" },
+          { id: 2, label: "Node 2" },
+          { id: 3, label: "Node 3" },
+          { id: 4, label: "Node 4" }
+      ],
+      edges: [
+          { from: 1, to: 2 },
+          { from: 1, to: 3 },
+          { from: 2, to: 4 }
+      ]
+  };
+
+  // Create a network
+  const container = document.getElementById("network");
+
+
+
+  const options = {
+      nodes: {
+          shape: "circle",
+          size: 20,
+          color: "#66ccff",
+          font: { color: "#000" }
+      },
+      edges: {
+          arrows: "to",
+          color: "#999"
+      },
+      physics: {
+          enabled: true
+      }
+  };
+
+  const produceData = (graphData)=> {
+      const data = {
+          nodes: new vis.DataSet(graphData.nodes),
+          edges: new vis.DataSet(graphData.edges)
+      };
+
+      return data;
+  }
+
+
+
+  const network = new vis.Network(container, produceData(graphData), options);
+
+</script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 import graph.ConfLoader;
+import graph.EmptyLoader;
 import graph.TopicDisplayer;
 import server.HTTPServer;
 import server.MyHTTPServer;
@@ -9,6 +10,7 @@ public class Main {
         HTTPServer server = new MyHTTPServer(8080, 5);
         server.addServlet("GET", "/publish", new TopicDisplayer());
         server.addServlet("POST", "/upload", new ConfLoader());
+        server.addServlet("POST", "/adam", new EmptyLoader());
         server.addServlet("GET", "/app/", new HtmlLoader("web"));
         server.start();
         System.in.read();
