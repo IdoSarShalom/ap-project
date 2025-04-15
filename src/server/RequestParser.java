@@ -10,77 +10,38 @@ import java.util.Map;
 public class RequestParser {
 
     public static RequestInfo parseRequest(BufferedReader reader) throws IOException {
-        // 1. Read Request Line
-        String requestLine = reader.readLine();
-        if (requestLine == null || requestLine.isEmpty()) {
-            throw new IOException("Empty or null request line received.");
-        }
+        String requestLine = readRequestLine(reader);
         String[] requestLineParts = splitRequestLine(requestLine);
+        validateRequestLine(requestLineParts);
         String httpCommand = extractHttpCommand(requestLineParts);
         String uri = extractUri(requestLineParts);
         String resourceUri = extractResourceUri(uri);
         String[] uriSegments = extractUriSegments(resourceUri);
         Map<String, String> parameters = extractParameters(uri);
-
-        // 2. Read Headers
         Map<String, String> headers = readHeaders(reader);
-
-        // 3. Read Content (Body) based on Content-Length
         byte[] content = readContent(reader, headers);
 
         return new RequestInfo(httpCommand, uri, resourceUri, uriSegments, parameters, headers, content);
     }
 
-    private static Map<String, String> readHeaders(BufferedReader reader) throws IOException {
-        Map<String, String> headers = new LinkedHashMap<>();
-        String line;
-        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            String[] headerParts = line.split(":", 2);
-            if (headerParts.length == 2) {
-                headers.put(headerParts[0].trim(), headerParts[1].trim());
-            }
-        }
-        return headers;
-    }
+    private static String readRequestLine(BufferedReader reader) throws IOException {
+        String requestLine = reader.readLine();
 
-    private static byte[] readContent(BufferedReader reader, Map<String, String> headers) throws IOException {
-        int contentLength = 0;
-        String contentLengthHeader = headers.get("Content-Length");
-        if (contentLengthHeader != null) {
-            try {
-                contentLength = Integer.parseInt(contentLengthHeader.trim());
-                if (contentLength < 0) {
-                    throw new IOException("Invalid Content-Length (negative value): " + contentLengthHeader);
-                }
-            } catch (NumberFormatException e) {
-                // If Content-Length is present but invalid, it's a bad request.
-                throw new IOException("Invalid Content-Length header value: " + contentLengthHeader, e);
-            }
+        if (requestLine == null || requestLine.isEmpty()) {
+            throw new IOException("Empty or null request line received.");
         }
 
-        // If Content-Length header is missing or zero, assume no body.
-        if (contentLength <= 0) {
-            return new byte[0];
-        }
-
-        // Read exactly contentLength characters
-        char[] contentChars = new char[contentLength];
-        int bytesRead = 0;
-        while (bytesRead < contentLength) {
-            int result = reader.read(contentChars, bytesRead, contentLength - bytesRead);
-            if (result == -1) {
-                // This indicates the client closed the connection before sending the full body
-                throw new IOException("Unexpected end of stream while reading request body. Expected " + contentLength + " bytes, got " + bytesRead);
-            }
-            bytesRead += result;
-        }
-
-        // Convert char array to byte array (assuming UTF-8)
-        return new String(contentChars).getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        return requestLine;
     }
 
     private static String[] splitRequestLine(String line) {
         return line.split("\\s+", 3);
+    }
+
+    private static void validateRequestLine(String[] parts) throws IOException {
+        if (parts.length < 2) {
+            throw new IOException("Invalid request line: insufficient parts.");
+        }
     }
 
     private static String extractHttpCommand(String[] parts) {
@@ -88,11 +49,19 @@ public class RequestParser {
     }
 
     private static String extractUri(String[] parts) {
-        return parts.length > 1 ? parts[1] : "";
+        if (parts.length > 1) {
+            return parts[1];
+        }
+
+        return "";
     }
 
     private static String extractResourceUri(String uri) {
-        return uri.contains("?") ? uri.substring(0, uri.indexOf('?')) : uri;
+        if (uri.contains("?")) {
+            return uri.substring(0, uri.indexOf('?'));
+        }
+
+        return uri;
     }
 
     private static String[] extractUriSegments(String resourceUri) {
@@ -103,30 +72,89 @@ public class RequestParser {
 
     private static Map<String, String> extractParameters(String uri) {
         String query = uri.contains("?") ? uri.substring(uri.indexOf('?') + 1) : "";
-        if (query.isEmpty()) return new HashMap<>();
+
+        if (query.isEmpty()) {
+            return new HashMap<>();
+        }
 
         Map<String, String> parameters = new LinkedHashMap<>();
 
         for (String param : query.split("&")) {
-            if (param.trim().isEmpty()) continue;
-
-            String[] keyValuePair = param.split("=", 2);
-            if (hasInvalidKey(keyValuePair)) continue;
-
-            addParameter(keyValuePair, parameters);
+            if (param.trim().isEmpty()) {
+                continue;
+            }
+            parseParameter(param, parameters);
         }
 
         return parameters;
     }
 
-    private static boolean hasInvalidKey(String[] keyValuePair) {
-        return keyValuePair.length == 0 || keyValuePair[0].trim().isEmpty();
-    }
+    private static void parseParameter(String param, Map<String, String> parameters) {
+        String[] keyValuePair = param.split("=", 2);
 
-    private static void addParameter(String[] keyValuePair, Map<String, String> parameters) {
+        if (keyValuePair.length == 0 || keyValuePair[0].trim().isEmpty()) {
+            return;
+        }
         String key = keyValuePair[0].trim();
         String value = keyValuePair.length > 1 ? keyValuePair[1].trim() : "";
         parameters.put(key, value);
+    }
+
+    private static Map<String, String> readHeaders(BufferedReader reader) throws IOException {
+        Map<String, String> headers = new LinkedHashMap<>();
+        String line;
+
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            String[] headerParts = line.split(":", 2);
+
+            if (headerParts.length == 2) {
+                headers.put(headerParts[0].trim(), headerParts[1].trim());
+            }
+        }
+
+        return headers;
+    }
+
+    private static byte[] readContent(BufferedReader reader, Map<String, String> headers) throws IOException {
+        int contentLength = parseContentLength(headers);
+
+        if (contentLength <= 0) {
+            return new byte[0];
+        }
+
+        char[] contentChars = new char[contentLength];
+        int bytesRead = 0;
+
+        while (bytesRead < contentLength) {
+            int result = reader.read(contentChars, bytesRead, contentLength - bytesRead);
+
+            if (result == -1) {
+                throw new IOException("Unexpected end of stream while reading request body. Expected " + contentLength + " bytes, got " + bytesRead);
+            }
+            bytesRead += result;
+        }
+
+        return new String(contentChars).getBytes(java.nio.charset.StandardCharsets.UTF_8);
+    }
+
+    private static int parseContentLength(Map<String, String> headers) throws IOException {
+        String contentLengthHeader = headers.get("Content-Length");
+
+        if (contentLengthHeader == null) {
+            return 0;
+        }
+
+        try {
+            int contentLength = Integer.parseInt(contentLengthHeader.trim());
+
+            if (contentLength < 0) {
+                throw new IOException("Invalid Content-Length (negative value): " + contentLengthHeader);
+            }
+
+            return contentLength;
+        } catch (NumberFormatException e) {
+            throw new IOException("Invalid Content-Length header value: " + contentLengthHeader, e);
+        }
     }
 
     public static class RequestInfo {
