@@ -8,7 +8,7 @@ public class App4 {
         // Create our config
         GenericConfig config = new GenericConfig();
         // Set the path to our file
-        config.setConfFile("/home/ido/VSCodeProjects/ap-course-project-ex4/config_files/simple.conf");
+        config.setConfFile("/home/ido/IdeaProjects/ap-project/uploaded.conf");
 
         // Build it
         config.create();
