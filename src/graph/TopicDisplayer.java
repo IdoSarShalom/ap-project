@@ -2,46 +2,39 @@ package graph;
 
 import server.RequestParser;
 import servlets.Servlet;
+import views.HtmlGraphWriter;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 public class TopicDisplayer implements Servlet {
+    private static final String GRAPH_HTML_PATH = "web/graph.html";
 
     @Override
-    public void handle(RequestParser.RequestInfo ri, OutputStream toClient) throws IOException {
-        publishMessage(ri);
-        sendResponse(toClient);
+    public void handle(RequestParser.RequestInfo requestInfo, OutputStream clientOutput) throws IOException {
+        publishMessage(requestInfo);
+        generateGraphVisualization();
+        sendResponse(clientOutput);
     }
 
-    private void publishMessage(RequestParser.RequestInfo ri) {
-        String topic = ri.getParameters().get("topic");
-        String message = ri.getParameters().get("message");
-        TopicManagerSingleton.TopicManager tm = TopicManagerSingleton.get();
-        tm.getTopic(topic).publish(new Message(message));
+    private void publishMessage(RequestParser.RequestInfo requestInfo) {
+        String topic = requestInfo.getParameters().get("topic");
+        String message = requestInfo.getParameters().get("message");
+        TopicManagerSingleton.TopicManager topicManager = TopicManagerSingleton.get();
+        topicManager.getTopic(topic).publish(new Message(message));
     }
 
-    private void sendResponse(OutputStream toClient) throws IOException {
-
-        // TODO: invoke HTMLLoader perhaps after calculating the graph via HtmlGraphWriter
-        // Do this by invoking /app/ with the corresponding file e.g. index.html
-        // after preparing this file for the user
-
-
-        String htmlResponse = "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/html\r\n" +
-                "Connection: close\r\n\r\n" +
-                "<html><body><h1>Message Published</h1>" +
-                "<a href='/app/'>Go back to app</a>" +
-                "</body></html>";
-
-        toClient.write(htmlResponse.getBytes());
+    private void generateGraphVisualization() throws IOException {
+        Graph graph = new Graph();
+        graph.createFromTopics();
+        HtmlGraphWriter.getGraphHTML(graph, GRAPH_HTML_PATH);
     }
 
-    private String buildRedirectResponse() {
-        return "HTTP/1.1 200 OK\r\n" +
-                "Content-Type: text/html\r\n" +
+    private void sendResponse(OutputStream clientOutput) throws IOException {
+        String redirectResponse = "HTTP/1.1 302 Found\r\n" +
+                "Location: /app/index.html\r\n" +
                 "Connection: close\r\n\r\n";
+        clientOutput.write(redirectResponse.getBytes());
     }
 
     @Override
