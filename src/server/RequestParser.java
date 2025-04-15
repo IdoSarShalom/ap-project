@@ -2,42 +2,81 @@ package server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class RequestParser {
 
     public static RequestInfo parseRequest(BufferedReader reader) throws IOException {
-        List<String> allLines = readAllLines(reader);
-        ListIterator<String> iterator = allLines.listIterator();
-        String[] requestLineParts = parseRequestLineParts(iterator);
+        // 1. Read Request Line
+        String requestLine = reader.readLine();
+        if (requestLine == null || requestLine.isEmpty()) {
+            throw new IOException("Empty or null request line received.");
+        }
+        String[] requestLineParts = splitRequestLine(requestLine);
         String httpCommand = extractHttpCommand(requestLineParts);
         String uri = extractUri(requestLineParts);
         String resourceUri = extractResourceUri(uri);
         String[] uriSegments = extractUriSegments(resourceUri);
         Map<String, String> parameters = extractParameters(uri);
-        Map<String, String> headers = buildHeaders(iterator);
-        byte[] content = buildContentFromIterator(iterator, headers);
+
+        // 2. Read Headers
+        Map<String, String> headers = readHeaders(reader);
+
+        // 3. Read Content (Body) based on Content-Length
+        byte[] content = readContent(reader, headers);
 
         return new RequestInfo(httpCommand, uri, resourceUri, uriSegments, parameters, headers, content);
     }
 
-    private static List<String> readAllLines(BufferedReader reader) throws IOException {
-        List<String> lines = new ArrayList<>();
+    private static Map<String, String> readHeaders(BufferedReader reader) throws IOException {
+        Map<String, String> headers = new LinkedHashMap<>();
         String line;
-
-        while (reader.ready() && (line = reader.readLine()) != null) {
-            lines.add(line);
+        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+            String[] headerParts = line.split(":", 2);
+            if (headerParts.length == 2) {
+                headers.put(headerParts[0].trim(), headerParts[1].trim());
+            }
         }
-        return lines;
+        return headers;
     }
 
-    private static String[] parseRequestLineParts(ListIterator<String> iterator) {
-        String line = getNextLine(iterator);
-        return splitRequestLine(line);
-    }
+    private static byte[] readContent(BufferedReader reader, Map<String, String> headers) throws IOException {
+        int contentLength = 0;
+        String contentLengthHeader = headers.get("Content-Length");
+        if (contentLengthHeader != null) {
+            try {
+                contentLength = Integer.parseInt(contentLengthHeader.trim());
+                if (contentLength < 0) {
+                    throw new IOException("Invalid Content-Length (negative value): " + contentLengthHeader);
+                }
+            } catch (NumberFormatException e) {
+                // If Content-Length is present but invalid, it's a bad request.
+                throw new IOException("Invalid Content-Length header value: " + contentLengthHeader, e);
+            }
+        }
 
-    private static String getNextLine(ListIterator<String> iterator) {
-        return iterator.hasNext() ? iterator.next() : "";
+        // If Content-Length header is missing or zero, assume no body.
+        if (contentLength <= 0) {
+            return new byte[0];
+        }
+
+        // Read exactly contentLength characters
+        char[] contentChars = new char[contentLength];
+        int bytesRead = 0;
+        while (bytesRead < contentLength) {
+            int result = reader.read(contentChars, bytesRead, contentLength - bytesRead);
+            if (result == -1) {
+                // This indicates the client closed the connection before sending the full body
+                throw new IOException("Unexpected end of stream while reading request body. Expected " + contentLength + " bytes, got " + bytesRead);
+            }
+            bytesRead += result;
+        }
+
+        // Convert char array to byte array (assuming UTF-8)
+        return new String(contentChars).getBytes(java.nio.charset.StandardCharsets.UTF_8);
     }
 
     private static String[] splitRequestLine(String line) {
@@ -80,47 +119,6 @@ public class RequestParser {
         return parameters;
     }
 
-    private static Map<String, String> buildHeaders(ListIterator<String> iterator) {
-        Map<String, String> headers = new LinkedHashMap<>();
-
-        while (iterator.hasNext()) {
-            String line = iterator.next();
-            if (line.isEmpty()) {
-                break;
-            }
-            String[] headerParts = line.split(":", 2);
-            if (headerParts.length == 2) {
-                headers.put(headerParts[0].trim(), headerParts[1].trim());
-            }
-        }
-        return headers;
-    }
-
-    private static void buildOtherParameters(ListIterator<String> iterator, Map<String, String> parameters) {
-        while (iterator.hasNext()) {
-            if (processNextParameterLine(iterator, parameters)) {
-                break;
-            }
-        }
-    }
-
-    private static boolean processNextParameterLine(ListIterator<String> iterator, Map<String, String> parameters) {
-        String line = getNextLine(iterator);
-        if (line.isEmpty()) {
-            return true;
-        }
-        String[] keyValuePair = splitParameterLine(line);
-        if (hasInvalidKey(keyValuePair)) {
-            return false;
-        }
-        addParameter(keyValuePair, parameters);
-        return false;
-    }
-
-    private static String[] splitParameterLine(String line) {
-        return line.split("=", 2);
-    }
-
     private static boolean hasInvalidKey(String[] keyValuePair) {
         return keyValuePair.length == 0 || keyValuePair[0].trim().isEmpty();
     }
@@ -129,13 +127,6 @@ public class RequestParser {
         String key = keyValuePair[0].trim();
         String value = keyValuePair.length > 1 ? keyValuePair[1].trim() : "";
         parameters.put(key, value);
-    }
-
-    private static byte[] buildContentFromIterator(ListIterator<String> iterator, Map<String, String> headers) {
-        List<String> lines = new ArrayList<>();
-        iterator.forEachRemaining(lines::add);
-
-        return String.join("\n", lines).getBytes();
     }
 
     public static class RequestInfo {
