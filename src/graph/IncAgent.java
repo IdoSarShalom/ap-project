@@ -7,6 +7,7 @@ public class IncAgent implements Agent {
     private final String[] subscribedTopics;
     private final String[] publishedTopics;
     private final TopicManagerSingleton.TopicManager topicManager;
+    private Double operand;
 
     public IncAgent(String[] subscribedTopics, String[] publishedTopics) {
         this.subscribedTopics = subscribedTopics;
@@ -45,8 +46,9 @@ public class IncAgent implements Agent {
             return;
         }
 
+        operand = msg.asDouble;
         if (hasPublishedTopics()) {
-            publishIncrementedValue(msg.asDouble);
+            publishIncrementedValue(operand);
         }
     }
 
@@ -75,5 +77,22 @@ public class IncAgent implements Agent {
         if (publishedTopics.length > 0) {
             topicManager.getTopic(publishedTopics[0]).removePublisher(this);
         }
+    }
+
+    // Getters for the fields
+    public String[] getSubscribedTopics() {
+        return subscribedTopics;
+    }
+
+    public String[] getPublishedTopics() {
+        return publishedTopics;
+    }
+
+    public TopicManagerSingleton.TopicManager getTopicManager() {
+        return topicManager;
+    }
+
+    public Double getOperand() {
+        return operand;
     }
 }

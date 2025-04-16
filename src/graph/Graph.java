@@ -15,10 +15,16 @@ public class Graph extends ArrayList<Node> {
 
     public void createFromTopics() {
         clearGraph();
-
         Map<Topic, Node> topicNodeMap = new ConcurrentHashMap<>();
         Map<Agent, Node> agentNodeMap = new ConcurrentHashMap<>();
+        processTopics(topicNodeMap, agentNodeMap);
+    }
 
+    private void clearGraph() {
+        clear();
+    }
+
+    private void processTopics(Map<Topic, Node> topicNodeMap, Map<Agent, Node> agentNodeMap) {
         TopicManagerSingleton.TopicManager topicManager = TopicManagerSingleton.get();
 
         for (Topic topic : topicManager.getTopics()) {
@@ -28,55 +34,25 @@ public class Graph extends ArrayList<Node> {
         }
     }
 
-    private void clearGraph() {
-        clear();
-    }
-
     private Node retrieveOrCreateTopicNode(Topic topic, Map<Topic, Node> topicNodeMap) {
-        return topicNodeMap.computeIfAbsent(topic, t -> {
-            Node newNode = new Node(String.format("%s", t.name));
-            this.add(newNode);
-            return newNode;
-        });
+        return topicNodeMap.computeIfAbsent(topic, t -> createNewNode(t.name));
     }
 
     private Node retrieveOrCreateAgentNode(Agent agent, Map<Agent, Node> agentNodeMap) {
-        return agentNodeMap.computeIfAbsent(agent, a -> {
-            Node newNode = new Node(String.format("%s", a.getName()));
-            this.add(newNode);
-            return newNode;
-        });
+        return agentNodeMap.computeIfAbsent(agent, a -> createNewNode(a.getName()));
+    }
+
+    private Node createNewNode(String name) {
+        Node newNode = new Node(String.format("%s", name));
+        this.add(newNode);
+        return newNode;
     }
 
     private void connectSubscribersToTopic(Topic topic, Node topicNode, Map<Agent, Node> agentNodeMap) {
         for (Agent subscriber : topic.getSubscribers()) {
-
             Node agentNode = retrieveOrCreateAgentNode(subscriber, agentNodeMap);
             topicNode.addEdge(agentNode);
-
-            if (subscriber instanceof PlusAgent) {
-                PlusAgent plusAgent = (PlusAgent) subscriber;
-
-                Double operand;
-                if (topic.name.equals(plusAgent.getSubscribedTopics()[0])) {
-                    operand = plusAgent.getFirstOperand();
-                } else {
-                    operand = plusAgent.getSecondOperand();
-                }
-
-                if (operand != null) {
-                    topicNode.setMessage(new Message(operand));
-                }
-
-
-            } else if (subscriber instanceof IncAgent) {
-                IncAgent incAgent = (IncAgent) subscriber;
-                Double operand = incAgent.getOperand();
-                if (operand != null) {
-                    topicNode.setMessage(new Message(operand));
-                }
-            }
-
+            processSubscriberMessage(subscriber, topic, topicNode);
         }
     }
 
@@ -84,6 +60,35 @@ public class Graph extends ArrayList<Node> {
         for (Agent publisher : topic.getPublishers()) {
             Node agentNode = retrieveOrCreateAgentNode(publisher, agentNodeMap);
             agentNode.addEdge(topicNode);
+        }
+    }
+
+    private void processSubscriberMessage(Agent subscriber, Topic topic, Node topicNode) {
+        if (subscriber instanceof PlusAgent) {
+            processPlusAgentMessage((PlusAgent) subscriber, topic, topicNode);
+        } else if (subscriber instanceof IncAgent) {
+            processIncAgentMessage((IncAgent) subscriber, topicNode);
+        }
+    }
+
+    private void processPlusAgentMessage(PlusAgent plusAgent, Topic topic, Node topicNode) {
+        Double operand = getPlusAgentOperand(plusAgent, topic);
+        if (operand != null) {
+            topicNode.setMessage(new Message(operand));
+        }
+    }
+
+    private Double getPlusAgentOperand(PlusAgent plusAgent, Topic topic) {
+        if (topic.name.equals(plusAgent.getSubscribedTopics()[0])) {
+            return plusAgent.getFirstOperand();
+        }
+        return plusAgent.getSecondOperand();
+    }
+
+    private void processIncAgentMessage(IncAgent incAgent, Node topicNode) {
+        Double operand = incAgent.getOperand();
+        if (operand != null) {
+            topicNode.setMessage(new Message(operand));
         }
     }
 }

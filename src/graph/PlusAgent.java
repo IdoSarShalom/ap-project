@@ -17,13 +17,13 @@ public class PlusAgent implements Agent {
 
         initializeSubscriptions();
         initializePublications();
-        resetOperands();
     }
 
     private void initializeSubscriptions() {
         if (subscribedTopics.length > 0) {
             topicManager.getTopic(subscribedTopics[0]).subscribe(this);
         }
+
         if (subscribedTopics.length > 1) {
             topicManager.getTopic(subscribedTopics[1]).subscribe(this);
         }
@@ -105,5 +105,25 @@ public class PlusAgent implements Agent {
         if (publishedTopics.length > 0) {
             topicManager.getTopic(publishedTopics[0]).removePublisher(this);
         }
+    }
+
+    public String[] getSubscribedTopics() {
+        return subscribedTopics;
+    }
+
+    public String[] getPublishedTopics() {
+        return publishedTopics;
+    }
+
+    public TopicManagerSingleton.TopicManager getTopicManager() {
+        return topicManager;
+    }
+
+    public Double getFirstOperand() {
+        return firstOperand;
+    }
+
+    public Double getSecondOperand() {
+        return secondOperand;
     }
 }
