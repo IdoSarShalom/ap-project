@@ -9,6 +9,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class ConfLoader implements Servlet {
     private static final String TEMP_UPLOAD_PATH = "uploaded.conf";
@@ -60,5 +62,6 @@ public class ConfLoader implements Servlet {
 
     @Override
     public void close() throws IOException {
+        Files.deleteIfExists(Paths.get(TEMP_UPLOAD_PATH));
     }
 }
