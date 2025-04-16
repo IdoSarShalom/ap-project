@@ -50,8 +50,33 @@ public class Graph extends ArrayList<Node> {
 
     private void connectSubscribersToTopic(Topic topic, Node topicNode, Map<Agent, Node> agentNodeMap) {
         for (Agent subscriber : topic.getSubscribers()) {
+
             Node agentNode = retrieveOrCreateAgentNode(subscriber, agentNodeMap);
             topicNode.addEdge(agentNode);
+
+            if (subscriber instanceof PlusAgent) {
+                PlusAgent plusAgent = (PlusAgent) subscriber;
+
+                Double operand;
+                if (topic.name.equals(plusAgent.getSubscribedTopics()[0])) {
+                    operand = plusAgent.getFirstOperand();
+                } else {
+                    operand = plusAgent.getSecondOperand();
+                }
+
+                if (operand != null) {
+                    topicNode.setMessage(new Message(operand));
+                }
+
+
+            } else if (subscriber instanceof IncAgent) {
+                IncAgent incAgent = (IncAgent) subscriber;
+                Double operand = incAgent.getOperand();
+                if (operand != null) {
+                    topicNode.setMessage(new Message(operand));
+                }
+            }
+
         }
     }
 
