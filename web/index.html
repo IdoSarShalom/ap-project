@@ -11,7 +11,7 @@
         <h2>Pub/Sub System</h2>
         <div>
             <h3>Config Upload</h3>
-            <input type="file" id="configFile">
+            <input type="file" id="configFile" accept=".conf">
             <button id="deploy-btn">Deploy</button>
             <div id="config-error-area" class="error-message"></div>
         </div>
@@ -23,6 +23,7 @@
                 <label for="message">Message:</label>
                 <input type="text" id="message" name="message" placeholder="e.g., 5">
                 <button id="message-btn" type="submit">Publish</button>
+                <div id="publish-error-area" class="error-message"></div>
             </form>
         </div>
     </div>

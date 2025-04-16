@@ -52,6 +52,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Validate file extension
+        if (!file.name.toLowerCase().endsWith('.conf')) {
+            displayConfigError('Invalid file type. Please select a .conf file.');
+            // Clear the file input for better UX
+            fileInput.value = ''; // Reset the input
+            return;
+        }
+
         const reader = new FileReader();
 
         reader.onload = async (e) => {

@@ -3,6 +3,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const topicInput = document.getElementById('topic');
     const messageInput = document.getElementById('message');
     const graphFrame = document.getElementById('graphFrame');
+    const publishErrorArea = document.getElementById('publish-error-area'); // Get the new error area
+
+    /**
+     * Displays an error message in the publish error area.
+     * @param {string} message - The error message to display.
+     */
+    const displayPublishError = (message) => {
+        if (publishErrorArea) {
+            publishErrorArea.textContent = message;
+            publishErrorArea.style.display = 'block'; // Make sure it's visible
+        }
+    };
+
+    /**
+     * Clears the publish error area.
+     */
+    const clearPublishError = () => {
+        if (publishErrorArea) {
+            publishErrorArea.textContent = '';
+            publishErrorArea.style.display = 'none'; // Hide it
+        }
+    };
 
     /**
      * Updates the graph iframe with new HTML content.
@@ -28,13 +50,28 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     const handlePublishSubmit = async (event) => {
         event.preventDefault(); // Prevent default form submission
+        clearPublishError(); // Clear previous errors
 
         const topic = topicInput.value.trim();
         const message = messageInput.value.trim();
 
         if (!topic || !message) {
-            alert('Please enter both topic and message.');
+            displayPublishError('Please enter both topic and message.'); // Use new error display
+            return;
+        }
 
+        // Validate Topic format (exactly one A-Z)
+        const topicRegex = /^[A-Z]$/;
+        if (!topicRegex.test(topic)) {
+            displayPublishError('Invalid topic format. Topic must be exactly one uppercase letter (A-Z).');
+            topicInput.focus(); // Focus the topic input for correction
+            return;
+        }
+
+        // Validate if the message is a number (integer or double)
+        if (isNaN(Number(message))) {
+            displayPublishError('Invalid message format. Message must be a number (e.g., 5 or 3.14).'); // Use new error display
+            messageInput.focus(); // Focus the message input for correction
             return;
         }
 
@@ -55,12 +92,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 // messageInput.value = '';
             } else {
                 // Handle server-side errors if the publish endpoint can return them
-                alert(`Error publishing message: ${response.status} ${responseText}`);
+                displayPublishError(`Error publishing message: ${response.status} ${responseText}`); // Use new error display
             }
 
         } catch (error) {
             console.error('Error publishing message:', error);
-            alert('Failed to publish message. Check console for details.');
+            displayPublishError('Failed to publish message. Check console for details.'); // Use new error display
         }
     };
 
@@ -68,4 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (publishForm) {
         publishForm.addEventListener('submit', handlePublishSubmit);
     }
+
+    // Initial setup
+    clearPublishError();
 });
