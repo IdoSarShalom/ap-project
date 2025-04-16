@@ -34,11 +34,12 @@ h2, h3 {
 input[type="file"],
 input[type="text"],
 textarea {
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    width: calc(100% - 22px); /* Adjust width considering padding and border */
+    width: calc(100% - 18px); /* Adjust width considering padding and border */
+    display: block;
 }
 
 textarea {
@@ -55,6 +56,7 @@ button {
     cursor: pointer;
     margin-top: 5px;
     margin-bottom: 15px;
+    display: inline-block;
 }
 
 button:hover {
@@ -63,7 +65,7 @@ button:hover {
 
 .config-input-toggle {
     display: flex;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .toggle-btn {
@@ -72,6 +74,7 @@ button:hover {
     border-radius: 0;
     background-color: #f0f0f0;
     color: #333;
+    padding: 8px 15px;
 }
 
 .toggle-btn:first-child {
@@ -108,5 +111,66 @@ form div {
     color: red;
     font-weight: bold;
     margin-top: 10px;
+    margin-bottom: 15px;
     min-height: 1em; /* Ensure space is reserved even when empty */
+    clear: both;
+}
+
+#file-input-container,
+#text-input-container {
+    margin-bottom: 15px;
+}
+
+#deploy-btn {
+    display: block;
+    width: auto;
+    min-width: 100px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+}
+
+/* Add styles for the action container */
+.action-container {
+    margin-top: 5px;
+    margin-bottom: 15px;
+    clear: both;
+}
+
+/* Templates styling */
+.templates-container {
+    margin-top: 10px;
+    margin-bottom: 15px;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+}
+
+.templates-container h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 14px;
+}
+
+.template-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.template-btn {
+    flex: 0 0 auto;
+    padding: 6px 12px;
+    background-color: #f8f8f8;
+    color: #333;
+    border: 1px solid #ddd;
+    font-size: 12px;
+    margin: 0;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.template-btn:hover {
+    background-color: #e8e8e8;
+    color: #111;
+    border-color: #ccc;
 }

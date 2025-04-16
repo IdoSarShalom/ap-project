@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Get DOM elements
     const fileInput = document.getElementById('configFile');
     const configTextarea = document.getElementById('configText');
     const deployButton = document.getElementById('deploy-btn');
@@ -10,6 +11,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const textInputToggle = document.getElementById('text-input-toggle');
     const fileInputContainer = document.getElementById('file-input-container');
     const textInputContainer = document.getElementById('text-input-container');
+
+    // Template buttons
+    const simpleTemplateBtn = document.getElementById('simple-template');
+    const calculatorTemplateBtn = document.getElementById('calculator-template');
+    const pipelineTemplateBtn = document.getElementById('pipeline-template');
+
+    console.log("Initial DOM elements loaded:", {
+        configTextarea: configTextarea ? "Found" : "Not found",
+        simpleTemplateBtn: simpleTemplateBtn ? "Found" : "Not found",
+        calculatorTemplateBtn: calculatorTemplateBtn ? "Found" : "Not found",
+        pipelineTemplateBtn: pipelineTemplateBtn ? "Found" : "Not found"
+    });
 
     /**
      * Displays an error message in the config error area.
@@ -60,6 +73,62 @@ document.addEventListener('DOMContentLoaded', () => {
             textInputContainer.style.display = 'block';
             fileInputToggle.classList.remove('active');
             textInputToggle.classList.add('active');
+        }
+    };
+
+    // Define simple templates directly here as fallback
+    const LOCAL_TEMPLATES = {
+        simpleCounter: `IncAgent\nA\nB`,
+        calculator: `IncAgent\nINPUT\nTMP1\nPlusAgent\nTMP1,TMP2\nOUTPUT\nIncAgent\nTMP2\nTMP2`,
+        pipeline: `IncAgent\nINPUT\nSTEP1\nIncAgent\nSTEP1\nSTEP2A\nPlusAgent\nSTEP2A,STEP2B\nRESULT\nIncAgent\nSTEP1\nSTEP2B`
+    };
+
+    /**
+     * Loads a template into the text area
+     * @param {string} templateName - The name of the template to load
+     */
+    const loadTemplate = (templateName) => {
+        console.log(`Attempting to load template: ${templateName}`);
+
+        // Always switch to text input mode first
+        toggleInputMode('text');
+
+        // Make sure we have the textarea
+        if (!configTextarea) {
+            console.error("ERROR: Could not find textarea element with id 'configText'");
+            displayConfigError("System error: Could not find template text area");
+            return;
+        }
+
+        // Try to get template content
+        let templateContent = null;
+
+        // First try the global TEMPLATES object
+        if (window.TEMPLATES && window.TEMPLATES[templateName]) {
+            templateContent = window.TEMPLATES[templateName];
+            console.log(`Using template from window.TEMPLATES: ${templateName}`);
+        }
+        // Fall back to local templates if needed
+        else if (LOCAL_TEMPLATES[templateName]) {
+            templateContent = LOCAL_TEMPLATES[templateName];
+            console.log(`Using fallback template: ${templateName}`);
+        }
+        // No template found
+        else {
+            console.error(`Template '${templateName}' not found`);
+            displayConfigError(`Error: Template '${templateName}' not found`);
+            return;
+        }
+
+        // Update the textarea with template content
+        try {
+            console.log(`Setting textarea value to: ${templateContent.substring(0, 20)}...`);
+            configTextarea.value = templateContent;
+            clearConfigError();
+            console.log(`Template '${templateName}' loaded successfully`);
+        } catch (error) {
+            console.error("Error setting textarea value:", error);
+            displayConfigError(`Error loading template: ${error.message}`);
         }
     };
 
@@ -147,16 +216,65 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- Event Listeners ---
-    if (deployButton) {
-        deployButton.addEventListener('click', handleDeployClick);
-    }
+    // Set up event listeners for the template buttons
+    const setupTemplateButtons = () => {
+        if (simpleTemplateBtn) {
+            simpleTemplateBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log("Simple template button clicked");
+                loadTemplate('simpleCounter');
+            });
+        } else {
+            console.warn("Simple template button not found");
+        }
 
-    // Add toggle functionality
-    fileInputToggle.addEventListener('click', () => toggleInputMode('file'));
-    textInputToggle.addEventListener('click', () => toggleInputMode('text'));
+        if (calculatorTemplateBtn) {
+            calculatorTemplateBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log("Calculator template button clicked");
+                loadTemplate('calculator');
+            });
+        } else {
+            console.warn("Calculator template button not found");
+        }
 
-    // Initial setup
+        if (pipelineTemplateBtn) {
+            pipelineTemplateBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log("Pipeline template button clicked");
+                loadTemplate('pipeline');
+            });
+        } else {
+            console.warn("Pipeline template button not found");
+        }
+    };
+
+    // Set up the main event listeners
+    const setupEventListeners = () => {
+        console.log("Setting up event listeners...");
+
+        // Deploy Button
+        if (deployButton) {
+            deployButton.addEventListener('click', handleDeployClick);
+        } else {
+            console.warn("Deploy button not found");
+        }
+
+        // Toggle Buttons
+        if (fileInputToggle && textInputToggle) {
+            fileInputToggle.addEventListener('click', () => toggleInputMode('file'));
+            textInputToggle.addEventListener('click', () => toggleInputMode('text'));
+        } else {
+            console.warn("Toggle buttons not found");
+        }
+
+        // Set up template buttons
+        setupTemplateButtons();
+    };
+
+    // Initialize the application
+    console.log("DOM fully loaded. Initializing application...");
     clearConfigError();
     toggleInputMode('file'); // Start with file input mode active
+    setupEventListeners();
 });
