@@ -11,7 +11,16 @@
         <h2>Pub/Sub System</h2>
         <div>
             <h3>Config Upload</h3>
-            <input type="file" id="configFile" accept=".conf">
+            <div class="config-input-toggle">
+                <button id="file-input-toggle" class="toggle-btn active">File Upload</button>
+                <button id="text-input-toggle" class="toggle-btn">Text Input</button>
+            </div>
+            <div id="file-input-container">
+                <input type="file" id="configFile" accept=".conf">
+            </div>
+            <div id="text-input-container" style="display: none;">
+                <textarea id="configText" rows="8" placeholder="Enter your configuration here..."></textarea>
+            </div>
             <button id="deploy-btn">Deploy</button>
             <div id="config-error-area" class="error-message"></div>
         </div>
