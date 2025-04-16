@@ -20,9 +20,16 @@ public class ConfLoader implements Servlet {
         String configContent = extractConfigContent(requestInfo);
         saveConfigToFile(configContent);
         clearTopicManager();
-        createConfigFromFile();
-        String graphHtml = generateGraphVisualization();
-        sendGraphResponse(clientOutput, graphHtml);
+
+        try {
+            createConfigFromFile();
+            String graphHtml = generateGraphVisualization();
+            sendGraphResponse(clientOutput, graphHtml);
+        } catch (RuntimeException e) {
+            sendErrorResponse(clientOutput, e.getMessage());
+        } catch (IOException e) {
+            sendErrorResponse(clientOutput, "Internal server error: " + e.getMessage());
+        }
     }
 
     private String extractConfigContent(RequestParser.RequestInfo requestInfo) {
@@ -57,6 +64,15 @@ public class ConfLoader implements Servlet {
                 "Content-Length: " + graphHtml.length() + "\r\n" +
                 "Connection: close\r\n\r\n" +
                 graphHtml;
+        clientOutput.write(response.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private void sendErrorResponse(OutputStream clientOutput, String errorMessage) throws IOException {
+        String response = "HTTP/1.1 400 Bad Request\r\n" +
+                "Content-Type: text/plain\r\n" +
+                "Content-Length: " + errorMessage.getBytes(StandardCharsets.UTF_8).length + "\r\n" +
+                "Connection: close\r\n\r\n" +
+                errorMessage;
         clientOutput.write(response.getBytes(StandardCharsets.UTF_8));
     }
 
