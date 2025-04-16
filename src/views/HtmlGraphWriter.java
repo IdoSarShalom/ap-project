@@ -58,11 +58,22 @@ public class HtmlGraphWriter {
             Map<String, Object> nodeObj = new HashMap<>();
             int id = nodeIdMap.get(node);
             nodeObj.put("id", id);
-            nodeObj.put("label", node.getName());
+            nodeObj.put("label", getLabel(node));
+
             nodeData.add(nodeObj);
         }
 
         return nodeData;
+    }
+
+    private static String getLabel(Node node) {
+        String label = node.getName();
+
+        if (node.getMessage() != null) {
+            label += "\n" + node.getMessage().asDouble;
+        }
+
+        return label;
     }
 
     private static List<Map<String, Object>> createEdgeData(List<Node> nodes, Map<Node, Integer> nodeIdMap) {

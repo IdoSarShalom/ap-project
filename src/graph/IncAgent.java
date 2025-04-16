@@ -8,6 +8,7 @@ public class IncAgent implements Agent {
     private final String[] publishedTopics;
     private final TopicManagerSingleton.TopicManager topicManager;
     private Double operand;
+    private Double result;
 
     public IncAgent(String[] subscribedTopics, String[] publishedTopics) {
         this.subscribedTopics = subscribedTopics;
@@ -57,8 +58,8 @@ public class IncAgent implements Agent {
     }
 
     private void publishIncrementedValue(double originalValue) {
-        double incrementedValue = originalValue + 1.0;
-        topicManager.getTopic(publishedTopics[0]).publish(new Message(incrementedValue));
+        result = originalValue + 1.0;
+        topicManager.getTopic(publishedTopics[0]).publish(new Message(result));
     }
 
     @Override
@@ -94,5 +95,9 @@ public class IncAgent implements Agent {
 
     public Double getOperand() {
         return operand;
+    }
+
+    public Double getResult() {
+        return result;
     }
 }

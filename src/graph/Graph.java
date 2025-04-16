@@ -60,18 +60,19 @@ public class Graph extends ArrayList<Node> {
         for (Agent publisher : topic.getPublishers()) {
             Node agentNode = retrieveOrCreateAgentNode(publisher, agentNodeMap);
             agentNode.addEdge(topicNode);
+            processPublisherMessage(publisher, topic, topicNode);
         }
     }
 
     private void processSubscriberMessage(Agent subscriber, Topic topic, Node topicNode) {
         if (subscriber instanceof PlusAgent) {
-            processPlusAgentMessage((PlusAgent) subscriber, topic, topicNode);
+            processPlusAgentSubscriberMessage((PlusAgent) subscriber, topic, topicNode);
         } else if (subscriber instanceof IncAgent) {
-            processIncAgentMessage((IncAgent) subscriber, topicNode);
+            processIncAgentSubscriberMessage((IncAgent) subscriber, topicNode);
         }
     }
 
-    private void processPlusAgentMessage(PlusAgent plusAgent, Topic topic, Node topicNode) {
+    private void processPlusAgentSubscriberMessage(PlusAgent plusAgent, Topic topic, Node topicNode) {
         Double operand = getPlusAgentOperand(plusAgent, topic);
         if (operand != null) {
             topicNode.setMessage(new Message(operand));
@@ -85,10 +86,32 @@ public class Graph extends ArrayList<Node> {
         return plusAgent.getSecondOperand();
     }
 
-    private void processIncAgentMessage(IncAgent incAgent, Node topicNode) {
+    private void processIncAgentSubscriberMessage(IncAgent incAgent, Node topicNode) {
         Double operand = incAgent.getOperand();
         if (operand != null) {
             topicNode.setMessage(new Message(operand));
+        }
+    }
+
+    private void processPublisherMessage(Agent publisher, Topic topic, Node topicNode) {
+        if (publisher instanceof PlusAgent) {
+            processPlusAgentPublisherMessage((PlusAgent) publisher, topicNode);
+        } else if (publisher instanceof IncAgent) {
+            processIncAgentPublisherMessage((IncAgent) publisher, topicNode);
+        }
+    }
+
+    private void processPlusAgentPublisherMessage(PlusAgent plusAgent, Node topicNode) {
+        Double result = plusAgent.getResult();
+        if (result != null) {
+            topicNode.setMessage(new Message(result));
+        }
+    }
+
+    private void processIncAgentPublisherMessage(IncAgent incAgent, Node topicNode) {
+        Double result = incAgent.getResult();
+        if (result != null) {
+            topicNode.setMessage(new Message(result));
         }
     }
 }

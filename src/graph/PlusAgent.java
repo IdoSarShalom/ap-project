@@ -9,6 +9,7 @@ public class PlusAgent implements Agent {
     private final TopicManagerSingleton.TopicManager topicManager;
     private Double firstOperand;
     private Double secondOperand;
+    private Double result;
 
     public PlusAgent(String[] subscribedTopics, String[] publishedTopics) {
         this.subscribedTopics = subscribedTopics;
@@ -82,7 +83,7 @@ public class PlusAgent implements Agent {
     }
 
     private void publishResult() {
-        double result = firstOperand + secondOperand;
+        result = firstOperand + secondOperand;
         topicManager.getTopic(publishedTopics[0]).publish(new Message(result));
     }
 
@@ -125,5 +126,9 @@ public class PlusAgent implements Agent {
 
     public Double getSecondOperand() {
         return secondOperand;
+    }
+
+    public Double getResult() {
+        return result;
     }
 }
