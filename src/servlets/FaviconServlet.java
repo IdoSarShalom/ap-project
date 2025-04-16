@@ -9,7 +9,7 @@ import java.io.OutputStream;
 
 public class FaviconServlet implements Servlet {
     private byte[] iconBytes;
-    private static final String ICON_PATH = "/resources/favicon.ico";
+    private static final String ICON_PATH = "/servlets/favicon.ico";
 
     public FaviconServlet() {
         loadIcon();
