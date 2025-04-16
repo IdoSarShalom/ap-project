@@ -35,9 +35,13 @@
       const options = {
           nodes: {
               shape: "box",
-              size: 20,
+              size: 30,           // Increased size for multi-line labels
               color: "#66ccff",
-              font: { color: "#000" }
+              font: {
+                  size: 12,       // Smaller font for readability
+                  color: "#000",
+                  multi: true    // Enable multi-line labels
+              }
           },
           edges: {
               arrows: "to",
