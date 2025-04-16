@@ -13,7 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class ConfLoader implements Servlet {
-    private static final String TEMP_UPLOAD_PATH = "uploaded.conf";
+    private static final String UPLOADED_CONF_PATH = "uploaded.conf";
 
     @Override
     public void handle(RequestParser.RequestInfo requestInfo, OutputStream clientOutput) throws IOException {
@@ -30,7 +30,7 @@ public class ConfLoader implements Servlet {
     }
 
     private void saveConfigToFile(String content) throws IOException {
-        try (FileWriter writer = new FileWriter(TEMP_UPLOAD_PATH)) {
+        try (FileWriter writer = new FileWriter(UPLOADED_CONF_PATH)) {
             writer.write(content);
         }
     }
@@ -41,7 +41,7 @@ public class ConfLoader implements Servlet {
 
     private void createConfigFromFile() {
         GenericConfig config = new GenericConfig();
-        config.setConfFile(TEMP_UPLOAD_PATH);
+        config.setConfFile(UPLOADED_CONF_PATH);
         config.create();
     }
 
@@ -62,6 +62,6 @@ public class ConfLoader implements Servlet {
 
     @Override
     public void close() throws IOException {
-        Files.deleteIfExists(Paths.get(TEMP_UPLOAD_PATH));
+        Files.deleteIfExists(Paths.get(UPLOADED_CONF_PATH));
     }
 }

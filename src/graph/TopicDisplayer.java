@@ -6,9 +6,9 @@ import views.HtmlGraphWriter;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 public class TopicDisplayer implements Servlet {
-    private static final String GRAPH_HTML_PATH = "web/graph.html";
 
     @Override
     public void handle(RequestParser.RequestInfo requestInfo, OutputStream clientOutput) throws IOException {
@@ -31,15 +31,12 @@ public class TopicDisplayer implements Servlet {
     }
 
     private void sendGraphResponse(OutputStream clientOutput, String graphHtml) throws IOException {
-        String header = buildResponseHeader(graphHtml);
-        clientOutput.write(header.getBytes());
-    }
-
-    private String buildResponseHeader(String graphHtml) {
-        return "HTTP/1.1 200 OK\r\n" +
+        String response = "HTTP/1.1 200 OK\r\n" +
                 "Content-Type: text/html\r\n" +
+                "Content-Length: " + graphHtml.length() + "\r\n" +
                 "Connection: close\r\n\r\n" +
                 graphHtml;
+        clientOutput.write(response.getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
