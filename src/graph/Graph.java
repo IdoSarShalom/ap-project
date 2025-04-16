@@ -34,7 +34,7 @@ public class Graph extends ArrayList<Node> {
 
     private Node retrieveOrCreateTopicNode(Topic topic, Map<Topic, Node> topicNodeMap) {
         return topicNodeMap.computeIfAbsent(topic, t -> {
-            Node newNode = new Node(String.format("T%s", t.name));
+            Node newNode = new Node(String.format("%s", t.name));
             this.add(newNode);
             return newNode;
         });
@@ -42,7 +42,7 @@ public class Graph extends ArrayList<Node> {
 
     private Node retrieveOrCreateAgentNode(Agent agent, Map<Agent, Node> agentNodeMap) {
         return agentNodeMap.computeIfAbsent(agent, a -> {
-            Node newNode = new Node(String.format("A%s", a.getName()));
+            Node newNode = new Node(String.format("%s", a.getName()));
             this.add(newNode);
             return newNode;
         });
