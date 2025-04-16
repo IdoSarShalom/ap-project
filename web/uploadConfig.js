@@ -28,5 +28,6 @@ function uploadConfig() {
 
 
     document.addEventListener('DOMContentLoaded', ()=> {
-        document.getElementById('deploy-btn').addEventListener('click', ()=> uploadConfig())
+        document.getElementById('deploy-btn').addEventListener('click', ()=> uploadConfig());
+        document.getElementById('message-btn').addEventListener('click', ()=> uploadConfig());
     })

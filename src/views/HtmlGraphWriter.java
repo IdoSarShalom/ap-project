@@ -3,6 +3,9 @@ package views;
 import configs.Node;
 import graph.Graph;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,8 +13,12 @@ import java.util.Map;
 
 public class HtmlGraphWriter {
 
-    public static String getGraphHTML(Graph graph) {
-        return toGraphJson(graph);
+    public static String getGraphHTML(Graph graph) throws IOException {
+        final String GRAPH_PATH = "web/graph.html";
+        String template = Files.readString(Paths.get(GRAPH_PATH));
+        String jsonGraph = toGraphJson(graph);
+
+        return template.replace("{{GRAPH_DATA}}", jsonGraph);
     }
 
     private static String toGraphJson(Graph graph) {
