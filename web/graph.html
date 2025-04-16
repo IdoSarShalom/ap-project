@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
   <meta charset="UTF-8">
   <title>Graph Visualization</title>
-  <link href="https://unpkg.com/vis-network/styles/vis-network.css" rel="stylesheet" />
+  <link href="https://unpkg.com/vis-network/styles/vis-network.css" rel="stylesheet">
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
   <style>
     #network {
         width: 600px;
@@ -13,48 +15,45 @@
     }
   </style>
 </head>
+
 <body>
 <div id="network"></div>
 
 <script>
-
-
   const graphData = {{GRAPH_DATA}};
 
-  // Create a network
-  const container = document.getElementById("network");
+  function prepareData(graphData) {
 
-
-
-  const options = {
-      nodes: {
-          shape: "circle",
-          size: 20,
-          color: "#66ccff",
-          font: { color: "#000" }
-      },
-      edges: {
-          arrows: "to",
-          color: "#999"
-      },
-      physics: {
-          enabled: true
-      }
-  };
-
-  const produceData = (graphData)=> {
-      const data = {
+      return {
           nodes: new vis.DataSet(graphData.nodes),
           edges: new vis.DataSet(graphData.edges)
       };
-
-      return data;
   }
 
+  function initializeNetwork() {
+      const container = document.getElementById("network");
+      const options = {
+          nodes: {
+              shape: "circle",
+              size: 20,
+              color: "#66ccff",
+              font: { color: "#000" }
+          },
+          edges: {
+              arrows: "to",
+              color: "#999"
+          },
+          physics: {
+              enabled: true
+          }
+      };
+      const data = prepareData(graphData);
 
+      return new vis.Network(container, data, options);
+  }
 
-  const network = new vis.Network(container, produceData(graphData), options);
-
+  initializeNetwork();
 </script>
 </body>
+
 </html>
