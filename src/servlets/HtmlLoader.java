@@ -1,5 +1,6 @@
 package servlets;
 
+import graph.TopicManagerSingleton;
 import server.RequestParser;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ public class HtmlLoader implements Servlet {
             return;
         }
 
+        clearTopicManager();
         sendFileResponse(clientOutput, filePath);
     }
 
@@ -63,6 +65,10 @@ public class HtmlLoader implements Servlet {
                 "Connection: close\r\n\r\n" +
                 message;
         clientOutput.write(response.getBytes());
+    }
+
+    private void clearTopicManager() {
+        TopicManagerSingleton.get().clear();
     }
 
     private void streamFileContent(OutputStream clientOutput, Path filePath) throws IOException {
