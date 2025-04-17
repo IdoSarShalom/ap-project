@@ -29,8 +29,8 @@ public class Graph extends ArrayList<Node> {
 
         for (Topic topic : topicManager.getTopics()) {
             Node topicNode = retrieveOrCreateTopicNode(topic, topicNodeMap);
-            connectSubscribersToTopic(topic, topicNode, agentNodeMap);
             connectPublishersToTopic(topic, topicNode, agentNodeMap);
+            connectSubscribersToTopic(topic, topicNode, agentNodeMap);
         }
     }
 
@@ -43,7 +43,7 @@ public class Graph extends ArrayList<Node> {
     }
 
     private Node createNewNode(String name) {
-        Node newNode = new Node(String.format("%s", name));
+        Node newNode = new Node(name);
         this.add(newNode);
         return newNode;
     }
