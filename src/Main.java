@@ -1,8 +1,8 @@
-import graph.ConfLoader;
 import graph.EmptyLoader;
 import graph.TopicDisplayer;
 import server.HTTPServer;
 import server.MyHTTPServer;
+import servlets.ConfLoader;
 import servlets.FaviconServlet;
 import servlets.HtmlLoader;
 

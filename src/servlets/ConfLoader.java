@@ -1,8 +1,9 @@
-package graph;
+package servlets;
 
 import configs.GenericConfig;
+import graph.Graph;
+import graph.TopicManagerSingleton;
 import server.RequestParser;
-import servlets.Servlet;
 import views.HtmlGraphWriter;
 
 import java.io.FileWriter;
