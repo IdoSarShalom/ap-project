@@ -7,7 +7,6 @@ A flexible and interactive publish-subscribe messaging system with real-time gra
 ## Background
 
 This project implements a pub/sub (publish-subscribe) system for message distribution and processing. 
-Pub/sub enables loose coupling between components, where publishers send messages to specific topics without knowledge of subscribers, and subscribers receive messages from topics they're interested in without knowledge of publishers.
 
 Key features:
 - Dynamic configuration of pub/sub topologies using text or file-based configs
@@ -17,7 +16,7 @@ Key features:
 
 The system allows users to create custom pub/sub networks where:
 
-- **Topics** (represented by single uppercase letters) serve as message channels
+- **Topics** serve as message channels
 - **Agents** process input messages and publish results to output topics
 - **Messages** contain numeric values that flow through the network
 - **Visualization** shows the real-time state and message flow of the system
