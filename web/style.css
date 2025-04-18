@@ -200,6 +200,18 @@ button:active {
     display: block;
 }
 
+/* Style for buttons container */
+.buttons-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.buttons-container button {
+    margin: 0;
+    flex: 1;
+}
+
 /* New instructions display container styles */
 .instructions-display-container {
     background-color: #f8faff;

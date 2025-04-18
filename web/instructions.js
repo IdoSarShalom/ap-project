@@ -11,6 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleButton = instructionsToggle.querySelector('button');
     const secondToggleButton = document.getElementById('instructions-toggle-button');
 
+    // Get the elements for available agents section
+    const availableAgentsToggleButton = document.getElementById('available-agents-toggle-button');
+    const availableAgentsContainer = document.getElementById('available-agents-container');
+
     // Function to toggle instruction visibility
     const toggleInstructions = () => {
         if (instructionsContainer.style.display === 'none' ||
@@ -31,6 +35,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Function to toggle available agents visibility
+    const toggleAvailableAgents = () => {
+        if (availableAgentsContainer.style.display === 'none' ||
+            availableAgentsContainer.style.display === '') {
+            availableAgentsContainer.style.display = 'block';
+            availableAgentsContainer.classList.add('show');
+            availableAgentsToggleButton.textContent = 'Hide Available Agents';
+        } else {
+            availableAgentsContainer.style.display = 'none';
+            availableAgentsContainer.classList.remove('show');
+            availableAgentsToggleButton.textContent = 'Show Available Agents';
+        }
+    };
+
     // Add click event to the original toggle button
     toggleButton.addEventListener('click', (event) => {
         // Prevent event bubbling
@@ -44,6 +62,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // Prevent event bubbling
             event.stopPropagation();
             toggleInstructions();
+        });
+    }
+
+    // Add click event to the available agents toggle button
+    if (availableAgentsToggleButton) {
+        availableAgentsToggleButton.addEventListener('click', (event) => {
+            // Prevent event bubbling
+            event.stopPropagation();
+            toggleAvailableAgents();
         });
     }
 
