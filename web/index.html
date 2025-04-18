@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Pub/Sub System</title>
-    <link rel="stylesheet" href="./style.css">
+    <link href="./style.css" rel="stylesheet">
 </head>
 <body>
 <div class="container">
@@ -12,43 +12,43 @@
         <div>
             <h3>Config Upload</h3>
             <div class="config-input-toggle">
-                <button id="file-input-toggle" class="toggle-btn active">File Upload</button>
-                <button id="text-input-toggle" class="toggle-btn">Text Input</button>
+                <button class="toggle-btn active" id="file-input-toggle">File Upload</button>
+                <button class="toggle-btn" id="text-input-toggle">Text Input</button>
             </div>
             <div id="file-input-container">
-                <input type="file" id="configFile" accept=".conf">
+                <input accept=".conf" id="configFile" type="file">
             </div>
             <div id="text-input-container" style="display: none;">
-                <textarea id="configText" rows="8" placeholder="Enter your configuration here..."></textarea>
+                <textarea id="configText" placeholder="Enter your configuration here..." rows="8"></textarea>
                 <div class="templates-container">
                     <h4>Templates:</h4>
                     <div class="template-buttons">
-                        <button id="simple-template" class="template-btn">Simple Counter</button>
-                        <button id="calculator-template" class="template-btn">Calculator</button>
-                        <button id="pipeline-template" class="template-btn">Pipeline</button>
+                        <button class="template-btn" id="simple-template">Simple Counter</button>
+                        <button class="template-btn" id="calculator-template">Calculator</button>
+                        <button class="template-btn" id="pipeline-template">Pipeline</button>
                     </div>
                 </div>
             </div>
             <div class="action-container">
                 <button id="deploy-btn">Deploy</button>
             </div>
-            <div id="config-error-area" class="error-message"></div>
+            <div class="error-message" id="config-error-area"></div>
         </div>
         <div>
             <h3>Publish Message</h3>
             <form action="/publish" method="GET">
                 <label for="topic">Topic name:</label>
-                <input type="text" id="topic" name="topic" placeholder="e.g., B">
+                <input id="topic" name="topic" placeholder="e.g., B" type="text">
                 <label for="message">Message:</label>
-                <input type="text" id="message" name="message" placeholder="e.g., 5">
+                <input id="message" name="message" placeholder="e.g., 5" type="text">
                 <button id="message-btn" type="submit">Publish</button>
-                <div id="publish-error-area" class="error-message"></div>
+                <div class="error-message" id="publish-error-area"></div>
             </form>
         </div>
     </div>
     <div class="right-panel">
         <h2>Graph Visualization</h2>
-        <iframe id="graphFrame" src="temp.html" width="100%" height="500px"></iframe>
+        <iframe height="500px" id="graphFrame" src="temp.html" width="100%"></iframe>
     </div>
 </div>
 <script src="./templateConfigs.js"></script>

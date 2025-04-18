@@ -73,14 +73,14 @@ public class GenericConfig implements Config {
             validateTopicLine(subsLine, "Subscription", i);
             validateTopicLine(pubsLine, "Publication", i);
 
-            if (agentType.equals("IncAgent") || agentType.equals("DecAgent") || 
-                agentType.equals("NegAgent") || agentType.equals("AbsAgent") || 
-                agentType.equals("DoubleAgent")) {
+            if (agentType.equals("IncAgent") || agentType.equals("DecAgent") ||
+                    agentType.equals("NegAgent") || agentType.equals("AbsAgent") ||
+                    agentType.equals("DoubleAgent")) {
                 validateSingleInputAgentSubscription(subsLine, i, agentType);
                 validateSingleInputAgentPublication(pubsLine, i, agentType);
-            } else if (agentType.equals("PlusAgent") || agentType.equals("MultAgent") || 
-                      agentType.equals("MinusAgent") || agentType.equals("MaxAgent") || 
-                      agentType.equals("MinAgent") || agentType.equals("AvgAgent")) {
+            } else if (agentType.equals("PlusAgent") || agentType.equals("MultAgent") ||
+                    agentType.equals("MinusAgent") || agentType.equals("MaxAgent") ||
+                    agentType.equals("MinAgent") || agentType.equals("AvgAgent")) {
                 validateDoubleInputAgentSubscription(subsLine, i, agentType);
                 validateDoubleInputAgentPublication(pubsLine, i, agentType);
             }
@@ -113,22 +113,6 @@ public class GenericConfig implements Config {
         if (publishTopics.length != 1) {
             throw new RuntimeException(agentType + " at line " + (index * 3 + 3) + " must have exactly one publish topic. Found: " + publishTopics.length);
         }
-    }
-
-    private void validateIncAgentSubscription(String subsLine, int index) {
-        validateSingleInputAgentSubscription(subsLine, index, "IncAgent");
-    }
-
-    private void validateIncAgentPublication(String pubsLine, int index) {
-        validateSingleInputAgentPublication(pubsLine, index, "IncAgent");
-    }
-
-    private void validatePlusAgentSubscription(String subsLine, int index) {
-        validateDoubleInputAgentSubscription(subsLine, index, "PlusAgent");
-    }
-
-    private void validatePlusAgentPublication(String pubsLine, int index) {
-        validateDoubleInputAgentPublication(pubsLine, index, "PlusAgent");
     }
 
     private void validateAgentType(String agentType, int index) {

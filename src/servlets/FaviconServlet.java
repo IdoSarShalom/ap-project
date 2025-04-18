@@ -8,8 +8,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class FaviconServlet implements Servlet {
-    private byte[] iconBytes;
     private static final String ICON_PATH = "/servlets/favicon.ico";
+    private byte[] iconBytes;
 
     public FaviconServlet() {
         loadIcon();

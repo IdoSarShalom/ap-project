@@ -22,10 +22,10 @@ public class MyHTTPServer extends Thread implements HTTPServer {
 
     private final int port;
     private final int nThreads;
-    private volatile boolean running;
     private final ConcurrentHashMap<String, Servlet> getUriToServletMap;
     private final ConcurrentHashMap<String, Servlet> postUriToServletMap;
     private final ConcurrentHashMap<String, Servlet> deleteUriToServletMap;
+    private volatile boolean running;
     private ServerSocket serverSocket;
     private ExecutorService executor;
 
@@ -178,7 +178,9 @@ public class MyHTTPServer extends Thread implements HTTPServer {
                 logger.log(Level.WARNING, "IOException during request parsing: {0}", e.getMessage());
                 try {
                     writeBadRequest(out, "Malformed request reading failed");
-                } catch (IOException ioe) { logger.log(Level.WARNING, "Failed to send 400 error response.", ioe); }
+                } catch (IOException ioe) {
+                    logger.log(Level.WARNING, "Failed to send 400 error response.", ioe);
+                }
                 return;
             } else {
                 throw e;
@@ -191,7 +193,9 @@ public class MyHTTPServer extends Thread implements HTTPServer {
             logger.log(Level.INFO, "No servlet found for request: {0}", requestIdentifier);
             try {
                 writeNotFound(out, "No servlet for " + ri.getHttpCommand() + " " + ri.getResourceUri());
-            } catch (IOException ioe) { logger.log(Level.WARNING, "Failed to send 404 error response.", ioe); }
+            } catch (IOException ioe) {
+                logger.log(Level.WARNING, "Failed to send 404 error response.", ioe);
+            }
             return;
         }
 
