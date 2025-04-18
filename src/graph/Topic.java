@@ -27,10 +27,28 @@ class Topic {
     public void publish(Message msg) {
         subs.forEach(agent -> agent.callback(name, msg));
         pubs.forEach(agent -> {
-            switch (agent) {
-                case PlusAgent plusAgent -> plusAgent.setResult(msg.asDouble);
-                case IncAgent incAgent -> incAgent.setResult(msg.asDouble);
-                default -> {}
+            if (agent instanceof PlusAgent) {
+                ((PlusAgent) agent).setResult(msg.asDouble);
+            } else if (agent instanceof IncAgent) {
+                ((IncAgent) agent).setResult(msg.asDouble);
+            } else if (agent instanceof MultAgent) {
+                ((MultAgent) agent).setResult(msg.asDouble);
+            } else if (agent instanceof MinusAgent) {
+                ((MinusAgent) agent).setResult(msg.asDouble);
+            } else if (agent instanceof MaxAgent) {
+                ((MaxAgent) agent).setResult(msg.asDouble);
+            } else if (agent instanceof MinAgent) {
+                ((MinAgent) agent).setResult(msg.asDouble);
+            } else if (agent instanceof AvgAgent) {
+                ((AvgAgent) agent).setResult(msg.asDouble);
+            } else if (agent instanceof DecAgent) {
+                ((DecAgent) agent).setResult(msg.asDouble);
+            } else if (agent instanceof NegAgent) {
+                ((NegAgent) agent).setResult(msg.asDouble);
+            } else if (agent instanceof AbsAgent) {
+                ((AbsAgent) agent).setResult(msg.asDouble);
+            } else if (agent instanceof DoubleAgent) {
+                ((DoubleAgent) agent).setResult(msg.asDouble);
             }
         });
     }
