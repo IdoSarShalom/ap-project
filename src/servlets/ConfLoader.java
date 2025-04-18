@@ -56,6 +56,12 @@ public class ConfLoader implements Servlet {
     private String generateGraphVisualization() throws IOException {
         Graph graph = new Graph();
         graph.createFromTopics();
+
+        if (graph.hasCycles()) {
+            throw new RuntimeException("Invalid: The current configuration graph contains cycles. " +
+                    "Please provide a non-cyclic configuration.");
+        }
+
         return HtmlGraphWriter.getGraphHTML(graph);
     }
 
