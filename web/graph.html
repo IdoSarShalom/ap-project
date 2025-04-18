@@ -1,10 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Graph Visualization</title>
+    <link href="https://unpkg.com/vis-network/styles/vis-network.css" rel="stylesheet">
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
+    <style>
+        #network {
+            width: 600px;
+            height: 400px;
+            border: 1px solid lightgray;
+        }
+    </style>
 </head>
+
 <body>
-<h1>No configuration uploaded yet</h1>
+<div id="network"></div>
+
+<script>
+    const graphData = {{GRAPH_DATA}};
+
+    function prepareData(graphData) {
+
+        return {
+            nodes: new vis.DataSet(graphData.nodes),
+            edges: new vis.DataSet(graphData.edges)
+        };
+    }
+
+    function initializeNetwork() {
+        const container = document.getElementById("network");
+        const options = {
+            nodes: {
+                shape: "box",
+                size: 30,           // Increased size for multi-line labels
+                color: "#66ccff",
+                font: {
+                    size: 12,       // Smaller font for readability
+                    color: "#000",
+                    multi: true    // Enable multi-line labels
+                }
+            },
+            edges: {
+                arrows: "to",
+                color: "#999"
+            },
+            physics: {
+                enabled: true
+            }
+        };
+        const data = prepareData(graphData);
+
+        return new vis.Network(container, data, options);
+    }
+
+    initializeNetwork();
+</script>
 </body>
+
 </html>

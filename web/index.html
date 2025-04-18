@@ -2,35 +2,189 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pub/Sub System</title>
-    <link rel="stylesheet" href="./style.css">
+    <link href="./style.css" rel="stylesheet">
 </head>
 <body>
 <div class="container">
-    <div class="left-panel">
-        <h2>Pub/Sub System</h2>
-        <div>
-            <h3>Config Upload</h3>
-            <input type="file" id="configFile">
-            <button onclick="uploadConfig()">Deploy</button>
+    <!-- Instructions Section -->
+    <div class="instructions" style="display: none;">
+        <div class="instructions-header" id="instructions-toggle" style="display: none;">
+            <button class="toggle-instructions">Show Instructions</button>
         </div>
-        <div>
-            <h3>Publish Message</h3>
-            <form action="/publish" method="GET">
-                <label for="topic">Topic name:</label>
-                <input type="text" id="topic" name="topic" placeholder="e.g., B">
-                <label for="message">Message:</label>
-                <input type="text" id="message" name="message" placeholder="e.g., 5">
-                <button type="submit">Send</button>
-            </form>
+        <div class="instructions-content" id="instructions-content">
+
+            <h3>Getting Started:</h3>
+            <div class="instruction-step">
+                <strong>Step 1:</strong> Upload a Configuration
+                <ul>
+                    <li>You can upload a configuration file (.conf) using the "File Upload" option</li>
+                    <li>Or use "Text Input" to write your configuration directly</li>
+                    <li>Select a template for quick configuration</li>
+                    <li>Click "Upload" to activate your configuration</li>
+                </ul>
+            </div>
+
+            <div class="instruction-step">
+                <strong>Step 2:</strong> Publish Messages
+                <ul>
+                    <li>Enter a topic name (must be a single uppercase letter A-Z)</li>
+                    <li>Enter a message value (must be a number)</li>
+                    <li>Click "Publish" to send the message</li>
+                </ul>
+            </div>
+
+            <div class="instruction-step">
+                <strong>Step 3:</strong> Watch the Graph Visualization
+                <ul>
+                    <li>The right panel shows a visual representation of your pub/sub system</li>
+                    <li>Nodes represent topics and components</li>
+                    <li>Edges show the flow of messages between components</li>
+                    <li>The graph updates in real-time as messages are published</li>
+                </ul>
+            </div>
+
+            <h3>Configuration Examples:</h3>
+            <p><strong>Simple Counter:</strong> Increments a counter whenever a message is published.</p>
+            <p><strong>Calculator:</strong> Performs basic arithmetic operations on published values.</p>
+            <p><strong>Pipeline:</strong> Creates a chain of processing steps for messages.</p>
         </div>
     </div>
-    <div class="right-panel">
-        <h2>Graph Visualization</h2>
-        <iframe id="graphFrame" src="/app/graph.html" width="100%" height="500px"></iframe>
+
+    <!-- Main panels container -->
+    <div class="panels-container">
+        <div class="left-panel">
+            <h2>Pub/Sub System</h2>
+
+            <!-- Place both buttons in a container so they stay visible -->
+            <div class="buttons-container">
+                <button class="toggle-instructions" id="instructions-toggle-button">Show Instructions</button>
+                <button class="toggle-instructions" id="available-agents-toggle-button">Show Available Agents</button>
+            </div>
+
+            <div id="instructions-container" class="instructions-display-container" style="display: none;">
+                <div class="instructions-content-wrapper">
+
+                    <h3>Getting Started:</h3>
+                    <div class="instruction-step">
+                        <strong>Step 1:</strong> Deploy a Configuration
+                        <ul>
+                            <li>You can upload a configuration file (.conf) using the "File Upload" option</li>
+                            <li>Or use "Text Input" to write your configuration directly</li>
+                            <li>Select a template for quick configuration</li>
+                            <li>Click "Deploy Configuration" to activate your configuration</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-step">
+                        <strong>Step 2:</strong> Publish Messages
+                        <ul>
+                            <li>Enter a topic name (must be a single uppercase letter A-Z)</li>
+                            <li>Enter a message value (must be a Floating-point number)</li>
+                            <li>Click "Publish" to send the message</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-step">
+                        <strong>Step 3:</strong> Watch the Graph Visualization
+                        <ul>
+                            <li>The panel shows a visual representation of your pub/sub system</li>
+                            <li>Nodes represent topics and agents</li>
+                            <li>Edges show the flow of messages between components</li>
+                            <li>The graph updates in real-time as messages are published</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- New Available Agents Button and Content -->
+            <div id="available-agents-container" class="instructions-display-container" style="display: none;">
+                <div class="instructions-content-wrapper">
+                    <h3>Available Agents</h3>
+
+                    <div class="instruction-step">
+                        <h4>Two-Input Agents</h4>
+                        <p>These agents require exactly two input topics and produce one output topic:</p>
+                        <ul>
+                            <li><strong>PlusAgent (+)</strong> - Takes two numeric inputs and outputs their sum. <br>Example: Input 5, 3 → Output 8</li>
+                            <li><strong>MultAgent (×)</strong> - Multiplies two input values together. <br>Example: Input 5, 3 → Output 15</li>
+                            <li><strong>MinusAgent (-)</strong> - Subtracts the second input from the first. <br>Example: Input 5, 3 → Output 2</li>
+                            <li><strong>MaxAgent (↑)</strong> - Outputs the maximum value between two inputs. <br>Example: Input 5, 3 → Output 5</li>
+                            <li><strong>MinAgent (↓)</strong> - Outputs the minimum value between two inputs. <br>Example: Input 5, 3 → Output 3</li>
+                            <li><strong>AvgAgent (μ)</strong> - Computes the average of two input values. <br>Example: Input 5, 3 → Output 4</li>
+                        </ul>
+                    </div>
+
+                    <div class="instruction-step">
+                        <h4>One-Input Agents</h4>
+                        <p>These agents require exactly one input topic and produce one output topic:</p>
+                        <ul>
+                            <li><strong>IncAgent (+1)</strong> - Increments the input value by 1. <br>Example: Input 5 → Output 6</li>
+                            <li><strong>DecAgent (-1)</strong> - Decrements the input value by 1. <br>Example: Input 5 → Output 4</li>
+                            <li><strong>NegAgent (~)</strong> - Negates the input value (changes its sign). <br>Example: Input 5 → Output -5, Input -3 → Output 3</li>
+                            <li><strong>AbsAgent (| |)</strong> - Returns the absolute value of the input. <br>Example: Input -5 → Output 5, Input 3 → Output 3</li>
+                            <li><strong>DoubleAgent (2×)</strong> - Doubles the input value. <br>Example: Input 3 → Output 6</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3>Config Upload</h3>
+                <div class="config-input-toggle">
+                    <button class="toggle-btn active" id="file-input-toggle">File Upload</button>
+                    <button class="toggle-btn" id="text-input-toggle">Text Input</button>
+                </div>
+                <div id="file-input-container">
+                    <label for="configFile">Configuration File (.conf): </label>
+                    <input accept=".conf" id="configFile" type="file">
+                </div>
+                <div id="text-input-container" style="display: none;">
+                    <textarea id="configText" placeholder="Enter your configuration here..." rows="8"></textarea>
+                    <div class="templates-container">
+                        <h4>Templates:</h4>
+                        <div class="template-buttons">
+                            <button class="template-btn" id="simple-template">Simple Counter</button>
+                            <button class="template-btn" id="calculator-template">Calculator</button>
+                            <button class="template-btn" id="pipeline-template">Pipeline</button>
+                            <button class="template-btn" id="advanced-pipeline-template">Advanced Pipeline</button>
+                            <button class="template-btn" id="data-processor-template">Data Processor</button>
+                            <button class="template-btn" id="math-operations-template">Math Operations</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="action-container">
+                    <button id="deploy-btn">Upload</button>
+                </div>
+                <div class="error-message" id="config-error-area"></div>
+            </div>
+            <div class="panel-section">
+                <h3>Publish Message</h3>
+                <form action="/publish" method="GET">
+                    <div class="form-group">
+                        <label for="topic">Topic name (A-Z):</label>
+                        <input id="topic" name="topic" placeholder="e.g., B" type="text">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message (Floating-point number):</label>
+                        <input id="message" name="message" placeholder="e.g., 5" type="text">
+                    </div>
+                    <button id="message-btn" type="submit">Publish</button>
+                    <div class="error-message" id="publish-error-area"></div>
+                </form>
+            </div>
+        </div>
+        <div class="right-panel">
+            <h2>Graph Visualization</h2>
+            <iframe height="500px" id="graphFrame" src="temp.html" width="100%"></iframe>
+        </div>
     </div>
 </div>
-<script src="./uploadConfig.js">
-</script>
+<script src="./templateConfigs.js"></script>
+<script src="./uploadConfig.js"></script>
+<script src="./publishMessage.js"></script>
+<script src="./instructions.js"></script>
 </body>
 </html>

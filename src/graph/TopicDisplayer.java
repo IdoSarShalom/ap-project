@@ -6,15 +6,15 @@ import views.HtmlGraphWriter;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 public class TopicDisplayer implements Servlet {
-    private static final String GRAPH_HTML_PATH = "web/graph.html";
 
     @Override
     public void handle(RequestParser.RequestInfo requestInfo, OutputStream clientOutput) throws IOException {
         publishMessage(requestInfo);
-        generateGraphVisualization();
-        redirectToGraphView(clientOutput);
+        String graphHtml = generateGraphVisualization();
+        sendGraphResponse(clientOutput, graphHtml);
     }
 
     private void publishMessage(RequestParser.RequestInfo requestInfo) {
@@ -24,17 +24,19 @@ public class TopicDisplayer implements Servlet {
         topicManager.getTopic(topic).publish(new Message(message));
     }
 
-    private void generateGraphVisualization() throws IOException {
+    private String generateGraphVisualization() throws IOException {
         Graph graph = new Graph();
         graph.createFromTopics();
-        HtmlGraphWriter.getGraphHTML(graph, GRAPH_HTML_PATH);
+        return HtmlGraphWriter.getGraphHTML(graph);
     }
 
-    private void redirectToGraphView(OutputStream clientOutput) throws IOException {
-        String redirectResponse = "HTTP/1.1 302 Found\r\n" +
-                "Location: /app/index.html\r\n" +
-                "Connection: close\r\n\r\n";
-        clientOutput.write(redirectResponse.getBytes());
+    private void sendGraphResponse(OutputStream clientOutput, String graphHtml) throws IOException {
+        String response = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html\r\n" +
+                "Content-Length: " + graphHtml.length() + "\r\n" +
+                "Connection: close\r\n\r\n" +
+                graphHtml;
+        clientOutput.write(response.getBytes(StandardCharsets.UTF_8));
     }
 
     @Override

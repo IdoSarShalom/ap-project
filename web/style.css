@@ -1,34 +1,462 @@
-    .container {
-        display: flex;
-        font-family: Arial, sans-serif;
+body {
+    font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, 'Open Sans', sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    background-color: #f7f9fc;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    width: 90%;
+    max-width: 1200px;
+}
+
+/* Instructions styles */
+.instructions {
+    margin-bottom: 25px;
+    background-color: #f8faff;
+    border: 1px solid #e0e6f0;
+    border-radius: 10px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.instructions h2 {
+    margin-top: 0;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.instructions h3 {
+    margin-top: 18px;
+    margin-bottom: 12px;
+    color: #3a4a5e;
+    font-weight: 500;
+}
+
+.instructions p {
+    margin-bottom: 12px;
+    color: #475569;
+}
+
+.instructions ul {
+    padding-left: 20px;
+    margin-top: 8px;
+    margin-bottom: 12px;
+}
+
+.instructions li {
+    margin-bottom: 8px;
+    color: #475569;
+}
+
+.instruction-step {
+    margin-bottom: 18px;
+    border-left: 3px solid #5cb85c;
+    padding-left: 15px;
+}
+
+/* Main panels container */
+.panels-container {
+    display: flex;
+    width: 100%;
+    gap: 25px;
+}
+
+.left-panel {
+    width: 30%;
+    padding-right: 20px;
+    border-right: 1px solid #e6e9f0;
+}
+
+.right-panel {
+    width: 70%;
+    padding-left: 20px;
+}
+
+h2, h3 {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+input[type="file"],
+input[type="text"],
+textarea {
+    margin-bottom: 18px;
+    padding: 12px;
+    border: 1px solid #e0e6f0;
+    border-radius: 8px;
+    width: calc(100% - 26px);
+    display: block;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+input[type="text"]:focus,
+textarea:focus {
+    outline: none;
+    border-color: #5cb85c;
+    box-shadow: 0 0 0 3px rgba(92, 184, 92, 0.1);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+button {
+    padding: 10px 18px;
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    display: inline-block;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(92, 184, 92, 0.2);
+}
+
+button:hover {
+    background-color: #4cae4c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(92, 184, 92, 0.25);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.config-input-toggle {
+    display: flex;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.toggle-btn {
+    flex: 1;
+    margin: 0;
+    border-radius: 0;
+    background-color: #f0f5f0;
+    color: #333;
+    padding: 10px 15px;
+    font-weight: 500;
+    border: 1px solid #e0e6f0;
+    transition: all 0.2s ease;
+}
+
+.toggle-btn:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+
+.toggle-btn:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.toggle-btn.active {
+    background-color: #5cb85c;
+    color: white;
+    border-color: #5cb85c;
+    box-shadow: 0 2px 5px rgba(92, 184, 92, 0.2);
+}
+
+.toggle-instructions {
+    background-color: #5cb85c;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(92, 184, 92, 0.2);
+}
+
+.toggle-instructions:hover {
+    background-color: #4cae4c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(92, 184, 92, 0.25);
+}
+
+/* Style for the second toggle instructions button */
+#instructions-toggle-button {
+    margin-top: 0;
+    margin-bottom: 15px;
+    display: block;
+}
+
+/* Style for buttons container */
+.buttons-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.buttons-container button {
+    margin: 0;
+    flex: 1;
+}
+
+/* New instructions display container styles */
+.instructions-display-container {
+    background-color: #f8faff;
+    border: 1px solid #e0e6f0;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+    transition: all 0.3s ease;
+}
+
+.instructions-display-container h3 {
+    margin-top: 18px;
+    margin-bottom: 12px;
+    color: #3a4a5e;
+    font-weight: 500;
+}
+
+.instructions-display-container h3:first-child {
+    margin-top: 0;
+}
+
+.instructions-display-container p {
+    margin-bottom: 12px;
+    color: #475569;
+}
+
+.instructions-display-container ul {
+    padding-left: 20px;
+    margin-top: 8px;
+    margin-bottom: 12px;
+}
+
+.instructions-display-container li {
+    margin-bottom: 8px;
+    color: #475569;
+}
+
+.instructions-display-container .instruction-step {
+    margin-bottom: 18px;
+    border-left: 3px solid #5cb85c;
+    padding-left: 15px;
+}
+
+.instructions-display-container.show {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #3a4a5e;
+}
+
+#graphFrame {
+    border: 1px solid #e0e6f0;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+form div {
+    margin-bottom: 15px;
+}
+
+.error-message {
+    color: #e74c3c;
+    font-weight: 500;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    min-height: 1em;
+    clear: both;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background-color: rgba(231, 76, 60, 0.05);
+    border-left: 3px solid #e74c3c;
+    display: none;
+}
+
+.error-message:not(:empty) {
+    display: block;
+}
+
+#file-input-container,
+#text-input-container {
+    margin-bottom: 18px;
+}
+
+#deploy-btn {
+    display: block;
+    width: auto;
+    min-width: 100px;
+    margin-top: 18px;
+    margin-bottom: 20px;
+    background-color: #4a6bdf;
+    box-shadow: 0 2px 5px rgba(74, 107, 223, 0.2);
+}
+
+#deploy-btn:hover {
+    background-color: #3a5bc9;
+    box-shadow: 0 4px 8px rgba(74, 107, 223, 0.25);
+}
+
+#message-btn {
+    background-color: #5cb85c;
+    box-shadow: 0 2px 5px rgba(92, 184, 92, 0.2);
+}
+
+#message-btn:hover {
+    background-color: #4cae4c;
+    box-shadow: 0 4px 8px rgba(92, 184, 92, 0.25);
+}
+
+/* Add styles for the action container */
+.action-container {
+    margin-top: 8px;
+    margin-bottom: 18px;
+    clear: both;
+}
+
+/* Templates styling */
+.templates-container {
+    margin-top: 15px;
+    margin-bottom: 18px;
+    border-top: 1px solid #e6e9f0;
+    padding-top: 15px;
+}
+
+.templates-container h4 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: #3a4a5e;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.template-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.template-btn {
+    flex: 0 0 auto;
+    padding: 8px 14px;
+    background-color: #f8faff;
+    color: #3a4a5e;
+    border: 1px solid #e0e6f0;
+    border-radius: 6px;
+    font-size: 13px;
+    margin: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.template-btn:hover {
+    background-color: #e6ebf5;
+    color: #1a2533;
+    border-color: #c8d1e0;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* Instructions header styling */
+.instructions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.instructions-content {
+    display: none;
+    margin-top: 15px;
+    line-height: 1.6;
+}
+
+.instructions-content.show {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.panel-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e6e9f0;
+}
+
+.panel-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #3a4a5e;
+}
+
+.form-group input {
+    width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+    .panels-container {
+        flex-direction: column;
     }
+
+    .left-panel, .right-panel {
+        width: 100%;
+        padding: 0;
+        border-right: none;
+    }
+
     .left-panel {
-        width: 30%;
-        padding: 20px;
-        background-color: #f0f0f0;
+        margin-bottom: 30px;
+        padding-bottom: 30px;
+        border-bottom: 1px solid #e6e9f0;
     }
-    .right-panel {
-        width: 70%;
-        padding: 20px;
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 15px;
     }
-    h2 {
-        margin-top: 0;
+
+    .instructions-header {
+        flex-direction: column;
+        align-items: flex-start;
     }
-    div {
-        margin-bottom: 20px;
+
+    .instructions-header button {
+        margin-top: 10px;
     }
-    label {
-        display: block;
-        margin: 5px 0;
-    }
-    input[type="text"] {
-        width: 80%;
-        padding: 5px;
-    }
-    button {
-        padding: 5px 10px;
-        margin-top: 5px;
-    }
-    iframe {
-        border: 1px solid #ccc;
-    }
+}

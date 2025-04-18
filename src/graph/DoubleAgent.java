@@ -2,7 +2,7 @@ package graph;
 
 import configs.Agent;
 
-public class IncAgent implements Agent {
+public class DoubleAgent implements Agent {
 
     private final String[] subscribedTopics;
     private final String[] publishedTopics;
@@ -10,7 +10,7 @@ public class IncAgent implements Agent {
     private Double operand;
     private Double result;
 
-    public IncAgent(String[] subscribedTopics, String[] publishedTopics) {
+    public DoubleAgent(String[] subscribedTopics, String[] publishedTopics) {
         this.subscribedTopics = subscribedTopics;
         this.publishedTopics = publishedTopics;
         this.topicManager = TopicManagerSingleton.get();
@@ -49,7 +49,7 @@ public class IncAgent implements Agent {
 
         operand = msg.asDouble;
         if (hasPublishedTopics()) {
-            publishIncrementedValue(operand);
+            publishDoubledValue(operand);
         }
     }
 
@@ -57,8 +57,8 @@ public class IncAgent implements Agent {
         return publishedTopics.length > 0;
     }
 
-    private void publishIncrementedValue(double originalValue) {
-        result = originalValue + 1.0;
+    private void publishDoubledValue(double originalValue) {
+        result = originalValue * 2.0; // Double the value
         topicManager.getTopic(publishedTopics[0]).publish(new Message(result));
     }
 
@@ -104,4 +104,4 @@ public class IncAgent implements Agent {
     public void setResult(Double result) {
         this.result = result;
     }
-}
+} 
