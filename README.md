@@ -67,3 +67,5 @@ http://localhost:8080/app/
   - `configs/` - Configuration handling
 - `web/` - Frontend files
   - HTML, CSS, and JavaScript files for the user interface 
+
+With full code documentation.
