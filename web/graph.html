@@ -1,58 +1,67 @@
 <!DOCTYPE html>
-<!--
- * graph.html
- * 
- * This HTML file provides the visualization container for the pub/sub system graph.
- * It creates a canvas where the graph of topics, agents, and their connections are displayed.
- * The visualization uses D3.js for rendering the graph with nodes and connections.
- -->
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Graph Visualization</title>
-    <!-- Import D3.js library for graph visualization -->
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://unpkg.com/vis-network/styles/vis-network.css" rel="stylesheet">
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+
     <style>
-        body, html {
+        body {
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
         }
-        #graph-container {
-            width: 100%;
-            height: 100%;
-            background-color: #f9f9f9;
-        }
-        .node {
-            stroke: #fff;
-            stroke-width: 1.5px;
-        }
-        .link {
-            stroke: #999;
-            stroke-opacity: 0.6;
-        }
-        .node text {
-            pointer-events: none;
-            font-size: 12px;
-            text-anchor: middle;
+        #network {
+            width: 100vw;
+            height: 100vh;
+            border: 1px solid lightgray;
         }
     </style>
 </head>
 
 <body>
-    <!-- Main container for the graph visualization -->
-    <div id="graph-container"></div>
+<div id="network"></div>
 
-    <!-- The graph data will be inserted by the server in this script tag -->
-    <script>
-        window.onload = function () {
-            // Graph data is expected to be injected here as JS code by the server
+<script>
+    const graphData = {{GRAPH_DATA}};
+
+    function prepareData(graphData) {
+
+        return {
+            nodes: new vis.DataSet(graphData.nodes),
+            edges: new vis.DataSet(graphData.edges)
         };
-    </script>
+    }
+
+    function initializeNetwork() {
+        const container = document.getElementById("network");
+        const options = {
+            nodes: {
+                shape: "box",
+                size: 30,           // Increased size for multi-line labels
+                color: "#66ccff",
+                font: {
+                    size: 12,       // Smaller font for readability
+                    color: "#000",
+                    multi: true    // Enable multi-line labels
+                }
+            },
+            edges: {
+                arrows: "to",
+                color: "#999"
+            },
+            physics: {
+                enabled: true
+            }
+        };
+        const data = prepareData(graphData);
+
+        return new vis.Network(container, data, options);
+    }
+
+    initializeNetwork();
+</script>
 </body>
 
 </html>
