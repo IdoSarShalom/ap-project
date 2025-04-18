@@ -35,7 +35,7 @@ Users can design their own processing networks using configuration files or sele
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/ap-project.git
+git clone https://github.com/IdoSarShalom/ap-project.git
 cd ap-project
 ```
 
