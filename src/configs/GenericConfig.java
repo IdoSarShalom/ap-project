@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 public class GenericConfig implements Config {
 
     private static final String PACKAGE_PREFIX = "graph";
-    private static final Pattern TOPIC_PATTERN = Pattern.compile("^[A-Z]+$");
+    private static final Pattern TOPIC_PATTERN = Pattern.compile("^[A-Z]$");
 
     private final List<Agent> instantiatedAgents = new ArrayList<>();
     private final List<String> agentTypes = new ArrayList<>();
@@ -110,25 +110,28 @@ public class GenericConfig implements Config {
     }
 
     private void validateTopicLine(String line, String lineType, int index) {
+        if (line.isEmpty()) {
+            throw new RuntimeException(lineType + " line " + (index * 3 + (lineType.equals("Subscription") ? 2 : 3)) + " is empty.");
+        }
+
         if (!line.equals(line.trim())) {
             throw new RuntimeException(lineType + " line " + (index * 3 + (lineType.equals("Subscription") ? 2 : 3)) + " has leading or trailing spaces: '" + line + "'");
         }
 
-        if (!line.isEmpty()) {
-            String[] topics = line.split(",");
+        String[] topics = line.split(",");
 
-            for (String topic : topics) {
-                if (!TOPIC_PATTERN.matcher(topic).matches()) {
-                    throw new RuntimeException(lineType + " line " + (index * 3 + (lineType.equals("Subscription") ? 2 : 3)) + " contains invalid topic format: '" + topic + "'. Topics must only contain uppercase letters A-Z.");
-                }
-                if (topic.contains(" ")) {
-                    throw new RuntimeException(lineType + " line " + (index * 3 + (lineType.equals("Subscription") ? 2 : 3)) + " contains spaces in topic: '" + topic + "'");
-                }
-                if (topic.isEmpty()) {
-                    throw new RuntimeException(lineType + " line " + (index * 3 + (lineType.equals("Subscription") ? 2 : 3)) + " contains empty topic in: '" + line + "'");
-                }
+        for (String topic : topics) {
+            if (!TOPIC_PATTERN.matcher(topic).matches()) {
+                throw new RuntimeException(lineType + " line " + (index * 3 + (lineType.equals("Subscription") ? 2 : 3)) + " contains invalid topic format: '" + topic + "'. Topics must only contain a single uppercase letter A-Z.");
+            }
+            if (topic.contains(" ")) {
+                throw new RuntimeException(lineType + " line " + (index * 3 + (lineType.equals("Subscription") ? 2 : 3)) + " contains spaces in topic: '" + topic + "'");
+            }
+            if (topic.isEmpty()) {
+                throw new RuntimeException(lineType + " line " + (index * 3 + (lineType.equals("Subscription") ? 2 : 3)) + " contains empty topic in: '" + line + "'");
             }
         }
+
     }
 
     private void instantiateAgentsFromLists() {
