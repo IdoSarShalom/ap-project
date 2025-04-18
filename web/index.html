@@ -2,57 +2,113 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pub/Sub System</title>
     <link href="./style.css" rel="stylesheet">
 </head>
 <body>
 <div class="container">
-    <div class="left-panel">
-        <h2>Pub/Sub System</h2>
-        <div>
-            <h3>Config Upload</h3>
-            <div class="config-input-toggle">
-                <button class="toggle-btn active" id="file-input-toggle">File Upload</button>
-                <button class="toggle-btn" id="text-input-toggle">Text Input</button>
-            </div>
-            <div id="file-input-container">
-                <input accept=".conf" id="configFile" type="file">
-            </div>
-            <div id="text-input-container" style="display: none;">
-                <textarea id="configText" placeholder="Enter your configuration here..." rows="8"></textarea>
-                <div class="templates-container">
-                    <h4>Templates:</h4>
-                    <div class="template-buttons">
-                        <button class="template-btn" id="simple-template">Simple Counter</button>
-                        <button class="template-btn" id="calculator-template">Calculator</button>
-                        <button class="template-btn" id="pipeline-template">Pipeline</button>
-                    </div>
-                </div>
-            </div>
-            <div class="action-container">
-                <button id="deploy-btn">Deploy</button>
-            </div>
-            <div class="error-message" id="config-error-area"></div>
+    <!-- Instructions Section -->
+    <div class="instructions">
+        <div class="instructions-header" id="instructions-toggle">
+            <h2>How to Use This Pub/Sub System</h2>
+            <button class="toggle-instructions">Show Instructions</button>
         </div>
-        <div>
-            <h3>Publish Message</h3>
-            <form action="/publish" method="GET">
-                <label for="topic">Topic name:</label>
-                <input id="topic" name="topic" placeholder="e.g., B" type="text">
-                <label for="message">Message:</label>
-                <input id="message" name="message" placeholder="e.g., 5" type="text">
-                <button id="message-btn" type="submit">Publish</button>
-                <div class="error-message" id="publish-error-area"></div>
-            </form>
+        <div class="instructions-content" id="instructions-content">
+            <h3>What is a Pub/Sub System?</h3>
+            <p>A Publish/Subscribe (Pub/Sub) system is a messaging pattern where publishers send messages to topics, and subscribers receive messages from topics they're interested in. This creates a decoupled communication system.</p>
+
+            <h3>Getting Started:</h3>
+            <div class="instruction-step">
+                <strong>Step 1:</strong> Deploy a Configuration
+                <ul>
+                    <li>You can upload a configuration file (.conf) using the "File Upload" option</li>
+                    <li>Or use "Text Input" to write your configuration directly</li>
+                    <li>Select a template for quick configuration (Simple Counter, Calculator, or Pipeline)</li>
+                    <li>Click "Deploy" to activate your configuration</li>
+                </ul>
+            </div>
+
+            <div class="instruction-step">
+                <strong>Step 2:</strong> Publish Messages
+                <ul>
+                    <li>Enter a topic name (must be a single uppercase letter A-Z)</li>
+                    <li>Enter a message value (must be a number)</li>
+                    <li>Click "Publish" to send the message</li>
+                </ul>
+            </div>
+
+            <div class="instruction-step">
+                <strong>Step 3:</strong> Watch the Graph Visualization
+                <ul>
+                    <li>The right panel shows a visual representation of your pub/sub system</li>
+                    <li>Nodes represent topics and components</li>
+                    <li>Edges show the flow of messages between components</li>
+                    <li>The graph updates in real-time as messages are published</li>
+                </ul>
+            </div>
+
+            <h3>Configuration Examples:</h3>
+            <p><strong>Simple Counter:</strong> Increments a counter whenever a message is published.</p>
+            <p><strong>Calculator:</strong> Performs basic arithmetic operations on published values.</p>
+            <p><strong>Pipeline:</strong> Creates a chain of processing steps for messages.</p>
         </div>
     </div>
-    <div class="right-panel">
-        <h2>Graph Visualization</h2>
-        <iframe height="500px" id="graphFrame" src="temp.html" width="100%"></iframe>
+
+    <!-- Main panels container -->
+    <div class="panels-container">
+        <div class="left-panel">
+            <h2>Pub/Sub System</h2>
+            <div class="panel-section">
+                <h3>Config Upload</h3>
+                <div class="config-input-toggle">
+                    <button class="toggle-btn active" id="file-input-toggle">File Upload</button>
+                    <button class="toggle-btn" id="text-input-toggle">Text Input</button>
+                </div>
+                <div id="file-input-container">
+                    <input accept=".conf" id="configFile" type="file">
+                </div>
+                <div id="text-input-container" style="display: none;">
+                    <textarea id="configText" placeholder="Enter your configuration here..." rows="8"></textarea>
+                    <div class="templates-container">
+                        <h4>Templates:</h4>
+                        <div class="template-buttons">
+                            <button class="template-btn" id="simple-template">Simple Counter</button>
+                            <button class="template-btn" id="calculator-template">Calculator</button>
+                            <button class="template-btn" id="pipeline-template">Pipeline</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="action-container">
+                    <button id="deploy-btn">Deploy</button>
+                </div>
+                <div class="error-message" id="config-error-area"></div>
+            </div>
+            <div class="panel-section">
+                <h3>Publish Message</h3>
+                <form action="/publish" method="GET">
+                    <div class="form-group">
+                        <label for="topic">Topic name:</label>
+                        <input id="topic" name="topic" placeholder="e.g., B" type="text">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message:</label>
+                        <input id="message" name="message" placeholder="e.g., 5" type="text">
+                    </div>
+                    <button id="message-btn" type="submit">Publish</button>
+                    <div class="error-message" id="publish-error-area"></div>
+                </form>
+            </div>
+        </div>
+        <div class="right-panel">
+            <h2>Graph Visualization</h2>
+            <iframe height="500px" id="graphFrame" src="temp.html" width="100%"></iframe>
+        </div>
     </div>
 </div>
 <script src="./templateConfigs.js"></script>
 <script src="./uploadConfig.js"></script>
 <script src="./publishMessage.js"></script>
+<script src="./instructions.js"></script>
 </body>
 </html>
