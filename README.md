@@ -2,18 +2,16 @@
 
 A flexible and interactive publish-subscribe messaging system with real-time graph visualization.
 
-![Pub/Sub System in Action](insert_gif_path_here.gif)
+![Pub/Sub System in Action](readme-gif.gif)
 
 ## Background
 
-This project implements a pub/sub (publish-subscribe) system for message distribution and processing. Pub/sub enables loose coupling between components, where publishers send messages to specific topics without knowledge of subscribers, and subscribers receive messages from topics they're interested in without knowledge of publishers.
+This project implements a pub/sub (publish-subscribe) system for message distribution and processing. 
+Pub/sub enables loose coupling between components, where publishers send messages to specific topics without knowledge of subscribers, and subscribers receive messages from topics they're interested in without knowledge of publishers.
 
 Key features:
 - Dynamic configuration of pub/sub topologies using text or file-based configs
 - Real-time message publishing with immediate graph visualization
-- Pre-defined agent templates for common use cases
-- Support for various mathematical operations through specialized agents
-- Interactive web-based user interface
 
 ## System Overview
 
@@ -24,7 +22,7 @@ The system allows users to create custom pub/sub networks where:
 - **Messages** contain numeric values that flow through the network
 - **Visualization** shows the real-time state and message flow of the system
 
-Users can design their own processing networks using configuration files or select from pre-built templates like simple counters, calculators, and data processing pipelines.
+Users can design their own processing networks using configuration files or select from pre-built templates.
 
 ## Requirements
 
