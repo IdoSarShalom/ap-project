@@ -16,12 +16,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const simpleTemplateBtn = document.getElementById('simple-template');
     const calculatorTemplateBtn = document.getElementById('calculator-template');
     const pipelineTemplateBtn = document.getElementById('pipeline-template');
+    const advancedPipelineTemplateBtn = document.getElementById('advanced-pipeline-template');
+    const dataProcessorTemplateBtn = document.getElementById('data-processor-template');
+    const mathOperationsTemplateBtn = document.getElementById('math-operations-template');
 
     console.log("Initial DOM elements loaded:", {
         configTextarea: configTextarea ? "Found" : "Not found",
         simpleTemplateBtn: simpleTemplateBtn ? "Found" : "Not found",
         calculatorTemplateBtn: calculatorTemplateBtn ? "Found" : "Not found",
-        pipelineTemplateBtn: pipelineTemplateBtn ? "Found" : "Not found"
+        pipelineTemplateBtn: pipelineTemplateBtn ? "Found" : "Not found",
+        advancedPipelineTemplateBtn: advancedPipelineTemplateBtn ? "Found" : "Not found",
+        dataProcessorTemplateBtn: dataProcessorTemplateBtn ? "Found" : "Not found",
+        mathOperationsTemplateBtn: mathOperationsTemplateBtn ? "Found" : "Not found"
     });
 
     /**
@@ -78,9 +84,105 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Define simple templates directly here as fallback
     const LOCAL_TEMPLATES = {
-        simpleCounter: `IncAgent\nA\nB`,
-        calculator: `IncAgent\nINPUT\nTMP1\nPlusAgent\nTMP1,TMP2\nOUTPUT\nIncAgent\nTMP2\nTMP2`,
-        pipeline: `IncAgent\nINPUT\nSTEP1\nIncAgent\nSTEP1\nSTEP2A\nPlusAgent\nSTEP2A,STEP2B\nRESULT\nIncAgent\nSTEP1\nSTEP2B`
+        simpleCounter: `IncAgent
+A
+B`,
+        calculator: `IncAgent
+A
+D
+PlusAgent
+D,E
+F
+MultAgent
+F,G
+H`,
+        pipeline: `IncAgent
+A
+B
+DoubleAgent
+B
+C
+PlusAgent
+C,D
+E
+IncAgent
+D
+F`,
+        advancedPipeline: `IncAgent
+A
+B
+DecAgent
+B
+C
+PlusAgent
+C,D
+E
+MultAgent
+E,F
+G
+MinAgent
+G,H
+I
+MaxAgent
+I,J
+K
+IncAgent
+A
+D
+DecAgent
+A
+F
+DoubleAgent
+A
+H
+IncAgent
+A
+J`,
+        dataProcessor: `AbsAgent
+A
+B
+NegAgent
+B
+C
+DoubleAgent
+C
+D
+MinusAgent
+A,D
+E`,
+        mathOperations: `IncAgent
+A
+B
+DecAgent
+A
+C
+NegAgent
+A
+D
+AbsAgent
+D
+E
+DoubleAgent
+A
+F
+PlusAgent
+B,C
+G
+MinusAgent
+B,D
+H
+MultAgent
+E,F
+I
+MaxAgent
+G,H
+J
+MinAgent
+I,J
+K
+AvgAgent
+K,J
+L`
     };
 
     /**
@@ -246,6 +348,36 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } else {
             console.warn("Pipeline template button not found");
+        }
+
+        if (advancedPipelineTemplateBtn) {
+            advancedPipelineTemplateBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log("Advanced Pipeline template button clicked");
+                loadTemplate('advancedPipeline');
+            });
+        } else {
+            console.warn("Advanced Pipeline template button not found");
+        }
+
+        if (dataProcessorTemplateBtn) {
+            dataProcessorTemplateBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log("Data Processor template button clicked");
+                loadTemplate('dataProcessor');
+            });
+        } else {
+            console.warn("Data Processor template button not found");
+        }
+
+        if (mathOperationsTemplateBtn) {
+            mathOperationsTemplateBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log("Math Operations template button clicked");
+                loadTemplate('mathOperations');
+            });
+        } else {
+            console.warn("Math Operations template button not found");
         }
     };
 

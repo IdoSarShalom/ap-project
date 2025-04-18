@@ -10,11 +10,20 @@ window.TEMPLATES = {
     // Simple counter template
     simpleCounter: "IncAgent\nA\nB",
 
-    // Calculator template
-    calculator: "IncAgent\nINPUT\nTMP1\nPlusAgent\nTMP1,TMP2\nOUTPUT\nIncAgent\nTMP2\nTMP2",
+    // Calculator template with proper topic names
+    calculator: "IncAgent\nA\nD\nPlusAgent\nD,E\nF\nMultAgent\nF,G\nH",
 
-    // Pipeline template
-    pipeline: "IncAgent\nINPUT\nSTEP1\nIncAgent\nSTEP1\nSTEP2A\nPlusAgent\nSTEP2A,STEP2B\nRESULT\nIncAgent\nSTEP1\nSTEP2B"
+    // Pipeline template with proper topic names
+    pipeline: "IncAgent\nA\nB\nDoubleAgent\nB\nC\nPlusAgent\nC,D\nE\nIncAgent\nD\nF",
+
+    // Advanced Pipeline template with variety of agents
+    advancedPipeline: "IncAgent\nA\nB\nDecAgent\nB\nC\nPlusAgent\nC,D\nE\nMultAgent\nE,F\nG\nMinAgent\nG,H\nI\nMaxAgent\nI,J\nK\nIncAgent\nA\nD\nDecAgent\nA\nF\nDoubleAgent\nA\nH\nIncAgent\nA\nJ",
+
+    // Data Processor template with proper topic names
+    dataProcessor: "AbsAgent\nA\nB\nNegAgent\nB\nC\nDoubleAgent\nC\nD\nMinusAgent\nA,D\nE",
+
+    // Math Operations template with all operations
+    mathOperations: "IncAgent\nA\nB\nDecAgent\nA\nC\nNegAgent\nA\nD\nAbsAgent\nD\nE\nDoubleAgent\nA\nF\nPlusAgent\nB,C\nG\nMinusAgent\nB,D\nH\nMultAgent\nE,F\nI\nMaxAgent\nG,H\nJ\nMinAgent\nI,J\nK\nAvgAgent\nK,J\nL"
 };
 
 // Log available templates
