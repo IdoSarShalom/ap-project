@@ -8,7 +8,6 @@
 </head>
 <body>
 <div class="container">
-    <!-- Instructions Section -->
     <div class="instructions" style="display: none;">
         <div class="instructions-header" id="instructions-toggle" style="display: none;">
             <button class="toggle-instructions">Show Instructions</button>
@@ -24,7 +23,7 @@
                     <li>You can upload a configuration file (.conf) using the "File Upload" option</li>
                     <li>Or use "Text Input" to write your configuration directly</li>
                     <li>Select a template for quick configuration (Simple Counter, Calculator, or Pipeline)</li>
-                    <li>Click "Deploy" to activate your configuration</li>
+                    <li>Click "Deploy Configuration" to activate your configuration</li>
                 </ul>
             </div>
 
@@ -54,11 +53,12 @@
         </div>
     </div>
 
-    <!-- Main panels container -->
     <div class="panels-container">
         <div class="left-panel">
-            <h2>Pub/Sub System</h2>
+            <h2>Pub/Sub Controls</h2>
+
             <button class="toggle-instructions" id="instructions-toggle-button">Show Instructions</button>
+
             <div id="instructions-container" class="instructions-display-container" style="display: none;">
                 <div class="instructions-content-wrapper">
                     <h3>What is a Pub/Sub System?</h3>
@@ -71,7 +71,7 @@
                             <li>You can upload a configuration file (.conf) using the "File Upload" option</li>
                             <li>Or use "Text Input" to write your configuration directly</li>
                             <li>Select a template for quick configuration (Simple Counter, Calculator, or Pipeline)</li>
-                            <li>Click "Deploy" to activate your configuration</li>
+                            <li>Click "Deploy Configuration" to activate your configuration</li>
                         </ul>
                     </div>
 
@@ -100,13 +100,15 @@
                     <p><strong>Pipeline:</strong> Creates a chain of processing steps for messages.</p>
                 </div>
             </div>
+
             <div class="panel-section">
-                <h3>Config Upload</h3>
+                <h3>Deploy Configuration</h3>
                 <div class="config-input-toggle">
                     <button class="toggle-btn active" id="file-input-toggle">File Upload</button>
                     <button class="toggle-btn" id="text-input-toggle">Text Input</button>
                 </div>
                 <div id="file-input-container">
+                    <label for="configFile">Configuration File (.conf): </label>
                     <input accept=".conf" id="configFile" type="file">
                 </div>
                 <div id="text-input-container" style="display: none;">
@@ -121,19 +123,20 @@
                     </div>
                 </div>
                 <div class="action-container">
-                    <button id="deploy-btn">Deploy</button>
+                    <button id="deploy-btn">Deploy Configuration</button>
                 </div>
                 <div class="error-message" id="config-error-area"></div>
             </div>
+
             <div class="panel-section">
                 <h3>Publish Message</h3>
                 <form action="/publish" method="GET">
                     <div class="form-group">
-                        <label for="topic">Topic name:</label>
+                        <label for="topic">Topic Name (A-Z):</label>
                         <input id="topic" name="topic" placeholder="e.g., B" type="text">
                     </div>
                     <div class="form-group">
-                        <label for="message">Message:</label>
+                        <label for="message">Message (Number):</label>
                         <input id="message" name="message" placeholder="e.g., 5" type="text">
                     </div>
                     <button id="message-btn" type="submit">Publish</button>
@@ -141,6 +144,7 @@
                 </form>
             </div>
         </div>
+
         <div class="right-panel">
             <h2>Graph Visualization</h2>
             <iframe height="500px" id="graphFrame" src="temp.html" width="100%"></iframe>
