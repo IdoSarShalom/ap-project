@@ -12,6 +12,8 @@ Key features:
 - Dynamic configuration of pub/sub topologies using text or file-based configs
 - Real-time message publishing with immediate graph visualization
 
+This project was created by Ido Sar Shalom (Id: 212410146) as part of the Advanced Programming course (Course Code: 83677).
+
 ## System Overview
 
 The system allows users to create custom pub/sub networks where:
