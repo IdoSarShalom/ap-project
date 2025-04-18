@@ -55,14 +55,12 @@
 
     <div class="panels-container">
         <div class="left-panel">
-            <h2>Pub/Sub Controls</h2>
+            <h2>Pub/Sub System</h2>
 
             <button class="toggle-instructions" id="instructions-toggle-button">Show Instructions</button>
 
             <div id="instructions-container" class="instructions-display-container" style="display: none;">
                 <div class="instructions-content-wrapper">
-                    <h3>What is a Pub/Sub System?</h3>
-                    <p>A Publish/Subscribe (Pub/Sub) system is a messaging pattern where publishers send messages to topics, and subscribers receive messages from topics they're interested in. This creates a decoupled communication system.</p>
 
                     <h3>Getting Started:</h3>
                     <div class="instruction-step">
@@ -70,7 +68,7 @@
                         <ul>
                             <li>You can upload a configuration file (.conf) using the "File Upload" option</li>
                             <li>Or use "Text Input" to write your configuration directly</li>
-                            <li>Select a template for quick configuration (Simple Counter, Calculator, or Pipeline)</li>
+                            <li>Select a template for quick configuration</li>
                             <li>Click "Deploy Configuration" to activate your configuration</li>
                         </ul>
                     </div>
@@ -79,7 +77,7 @@
                         <strong>Step 2:</strong> Publish Messages
                         <ul>
                             <li>Enter a topic name (must be a single uppercase letter A-Z)</li>
-                            <li>Enter a message value (must be a number)</li>
+                            <li>Enter a message value (must be a Floating-point number)</li>
                             <li>Click "Publish" to send the message</li>
                         </ul>
                     </div>
@@ -87,17 +85,13 @@
                     <div class="instruction-step">
                         <strong>Step 3:</strong> Watch the Graph Visualization
                         <ul>
-                            <li>The right panel shows a visual representation of your pub/sub system</li>
-                            <li>Nodes represent topics and components</li>
+                            <li>The panel shows a visual representation of your pub/sub system</li>
+                            <li>Nodes represent topics and agents</li>
                             <li>Edges show the flow of messages between components</li>
                             <li>The graph updates in real-time as messages are published</li>
                         </ul>
                     </div>
 
-                    <h3>Configuration Examples:</h3>
-                    <p><strong>Simple Counter:</strong> Increments a counter whenever a message is published.</p>
-                    <p><strong>Calculator:</strong> Performs basic arithmetic operations on published values.</p>
-                    <p><strong>Pipeline:</strong> Creates a chain of processing steps for messages.</p>
                 </div>
             </div>
 
