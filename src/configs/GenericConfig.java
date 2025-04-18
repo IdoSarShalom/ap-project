@@ -122,7 +122,7 @@ public class GenericConfig implements Config {
 
         for (String topic : topics) {
             if (!TOPIC_PATTERN.matcher(topic).matches()) {
-                throw new RuntimeException(lineType + " line " + (index * 3 + (lineType.equals("Subscription") ? 2 : 3)) + " contains invalid topic format: '" + topic + "'. Topics must only contain a single uppercase letter A-Z.");
+                throw new RuntimeException(lineType + " line " + (index * 3 + (lineType.equals("Subscription") ? 2 : 3)) + " contains invalid topic format: '" + topic + "'. Topic must be exactly one uppercase letter (A-Z).");
             }
             if (topic.contains(" ")) {
                 throw new RuntimeException(lineType + " line " + (index * 3 + (lineType.equals("Subscription") ? 2 : 3)) + " contains spaces in topic: '" + topic + "'");
