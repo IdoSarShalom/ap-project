@@ -1,3 +1,15 @@
+/**
+ * Configuration Upload Module
+ * 
+ * This module handles the user interface for uploading and submitting configuration files
+ * to the pub/sub system. It provides functionality for:
+ * - Switching between file upload and text input modes
+ * - Loading predefined templates
+ * - Validating and submitting configurations
+ * - Displaying error messages
+ * - Updating the graph visualization
+ */
+
 document.addEventListener('DOMContentLoaded', () => {
     // Get DOM elements
     const fileInput = document.getElementById('configFile');
@@ -82,7 +94,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Define simple templates directly here as fallback
+    /**
+     * Predefined templates for different configuration scenarios.
+     * These are used as a fallback if the global TEMPLATES object is not available.
+     * @type {Object.<string, string>}
+     */
     const LOCAL_TEMPLATES = {
         simpleCounter: `IncAgent
 A
@@ -318,7 +334,10 @@ L`
         }
     };
 
-    // Set up event listeners for the template buttons
+    /**
+     * Sets up event listeners for all template buttons
+     * Creates click handlers for each button to load the corresponding template
+     */
     const setupTemplateButtons = () => {
         if (simpleTemplateBtn) {
             simpleTemplateBtn.addEventListener('click', (e) => {
@@ -381,7 +400,10 @@ L`
         }
     };
 
-    // Set up the main event listeners
+    /**
+     * Sets up all the main event listeners for the application
+     * This includes deploy button, toggle buttons, and template buttons
+     */
     const setupEventListeners = () => {
         console.log("Setting up event listeners...");
 
@@ -404,7 +426,10 @@ L`
         setupTemplateButtons();
     };
 
-    // Initialize the application
+    /**
+     * Initializes the application
+     * Sets up UI state and event listeners
+     */
     console.log("DOM fully loaded. Initializing application...");
     clearConfigError();
     toggleInputMode('file'); // Start with file input mode active
