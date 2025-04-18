@@ -25,7 +25,14 @@ class Topic {
     }
 
     public void publish(Message msg) {
-        subs.forEach(agent -> agent.callback(this.name, msg));
+        subs.forEach(agent -> agent.callback(name, msg));
+        pubs.forEach(agent -> {
+            switch (agent) {
+                case PlusAgent plusAgent -> plusAgent.setResult(msg.asDouble);
+                case IncAgent incAgent -> incAgent.setResult(msg.asDouble);
+                default -> {}
+            }
+        });
     }
 
     public void addPublisher(Agent agent) {

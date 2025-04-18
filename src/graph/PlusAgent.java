@@ -131,4 +131,8 @@ public class PlusAgent implements Agent {
     public Double getResult() {
         return result;
     }
+
+    public void setResult(Double result) {
+        this.result = result;
+    }
 }
