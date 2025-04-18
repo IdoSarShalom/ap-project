@@ -193,6 +193,61 @@ button:active {
     box-shadow: 0 4px 8px rgba(92, 184, 92, 0.25);
 }
 
+/* Style for the second toggle instructions button */
+#instructions-toggle-button {
+    margin-top: 0;
+    margin-bottom: 15px;
+    display: block;
+}
+
+/* New instructions display container styles */
+.instructions-display-container {
+    background-color: #f8faff;
+    border: 1px solid #e0e6f0;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+    transition: all 0.3s ease;
+}
+
+.instructions-display-container h3 {
+    margin-top: 18px;
+    margin-bottom: 12px;
+    color: #3a4a5e;
+    font-weight: 500;
+}
+
+.instructions-display-container h3:first-child {
+    margin-top: 0;
+}
+
+.instructions-display-container p {
+    margin-bottom: 12px;
+    color: #475569;
+}
+
+.instructions-display-container ul {
+    padding-left: 20px;
+    margin-top: 8px;
+    margin-bottom: 12px;
+}
+
+.instructions-display-container li {
+    margin-bottom: 8px;
+    color: #475569;
+}
+
+.instructions-display-container .instruction-step {
+    margin-bottom: 18px;
+    border-left: 3px solid #5cb85c;
+    padding-left: 15px;
+}
+
+.instructions-display-container.show {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
 label {
     display: block;
     margin-bottom: 8px;
