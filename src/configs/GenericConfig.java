@@ -63,34 +63,51 @@ public class GenericConfig implements Config {
         }
     }
 
-    private void validateConfigLists() {
+    public void validateConfigLists() {
         for (int i = 0; i < agentTypes.size(); i++) {
             String agentType = agentTypes.get(i);
             String subsLine = subscriptionLines.get(i);
             String pubsLine = publicationLines.get(i);
+
             validateAgentType(agentType, i);
             validateTopicLine(subsLine, "Subscription", i);
             validateTopicLine(pubsLine, "Publication", i);
 
             if (agentType.equals("IncAgent")) {
-                validateIncAgentConfig(subsLine, i);
+                validateIncAgentSubscription(subsLine, i);
+                validateIncAgentPublication(pubsLine, i);
             } else if (agentType.equals("PlusAgent")) {
-                validatePlusAgentConfig(subsLine, i);
+                validatePlusAgentSubscription(subsLine, i);
+                validatePlusAgentPublication(pubsLine, i);
             }
         }
     }
 
-    private void validateIncAgentConfig(String subsLine, int index) {
+    private void validateIncAgentSubscription(String subsLine, int index) {
         String[] listenTopics = parseTopics(subsLine);
         if (listenTopics.length != 1) {
-            throw new RuntimeException("IncAgent at line " + (index * 3 + 1) + " must have exactly one listen topic. Found: " + listenTopics.length);
+            throw new RuntimeException("IncAgent at line " + (index * 3 + 2) + " must have exactly one listen topic. Found: " + listenTopics.length);
         }
     }
 
-    private void validatePlusAgentConfig(String subsLine, int index) {
+    private void validateIncAgentPublication(String pubsLine, int index) {
+        String[] publishTopics = parseTopics(pubsLine);
+        if (publishTopics.length != 1) {
+            throw new RuntimeException("IncAgent at line " + (index * 3 + 3) + " must have exactly one publish topic. Found: " + publishTopics.length);
+        }
+    }
+
+    private void validatePlusAgentSubscription(String subsLine, int index) {
         String[] listenTopics = parseTopics(subsLine);
         if (listenTopics.length != 2) {
-            throw new RuntimeException("PlusAgent at line " + (index * 3 + 1) + " must have exactly two listen topics. Found: " + listenTopics.length);
+            throw new RuntimeException("PlusAgent at line " + (index * 3 + 2) + " must have exactly two listen topics. Found: " + listenTopics.length);
+        }
+    }
+
+    private void validatePlusAgentPublication(String pubsLine, int index) {
+        String[] publishTopics = parseTopics(pubsLine);
+        if (publishTopics.length != 1) {
+            throw new RuntimeException("PlusAgent at line " + (index * 3 + 3) + " must have exactly one publish topic. Found: " + publishTopics.length);
         }
     }
 
@@ -118,7 +135,11 @@ public class GenericConfig implements Config {
             throw new RuntimeException(lineType + " line " + (index * 3 + (lineType.equals("Subscription") ? 2 : 3)) + " has leading or trailing spaces: '" + line + "'");
         }
 
-        String[] topics = line.split(",");
+        if (line.endsWith(",")) {
+            throw new RuntimeException(lineType + " line " + (index * 3 + (lineType.equals("Subscription") ? 2 : 3)) + " ends with a comma: '" + line + "'");
+        }
+
+        String[] topics = parseTopics(line);
 
         for (String topic : topics) {
             if (!TOPIC_PATTERN.matcher(topic).matches()) {
@@ -131,7 +152,6 @@ public class GenericConfig implements Config {
                 throw new RuntimeException(lineType + " line " + (index * 3 + (lineType.equals("Subscription") ? 2 : 3)) + " contains empty topic in: '" + line + "'");
             }
         }
-
     }
 
     private void instantiateAgentsFromLists() {
@@ -148,7 +168,7 @@ public class GenericConfig implements Config {
     }
 
     private String[] parseTopics(String line) {
-        return (line.isEmpty()) ? new String[0] : line.split(",");
+        return line.split(",");
     }
 
     private Agent createAgentInstance(String className, String[] subs, String[] pubs) {
