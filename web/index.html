@@ -1,4 +1,12 @@
 <!DOCTYPE html>
+<!--
+ * index.html
+ * 
+ * Main entry point for the Pub/Sub System web interface.
+ * This file provides the user interface for uploading configurations,
+ * publishing messages to topics, and viewing the graph visualization
+ * of the pub/sub system's structure and data flow.
+ -->
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,7 +16,7 @@
 </head>
 <body>
 <div class="container">
-    <!-- Instructions Section -->
+    <!-- Instructions Section - Hidden by default, can be toggled -->
     <div class="instructions" style="display: none;">
         <div class="instructions-header" id="instructions-toggle" style="display: none;">
             <button class="toggle-instructions">Show Instructions</button>
@@ -54,15 +62,17 @@
 
     <!-- Main panels container -->
     <div class="panels-container">
+        <!-- Left Panel - Configuration and Publishing Controls -->
         <div class="left-panel">
             <h2>Pub/Sub System</h2>
 
-            <!-- Place both buttons in a container so they stay visible -->
+            <!-- Toggle buttons for Instructions and Available Agents -->
             <div class="buttons-container">
                 <button class="toggle-instructions" id="instructions-toggle-button">Show Instructions</button>
                 <button class="toggle-instructions" id="available-agents-toggle-button">Show Available Agents</button>
             </div>
 
+            <!-- Instructions Container - Displayed when toggled -->
             <div id="instructions-container" class="instructions-display-container" style="display: none;">
                 <div class="instructions-content-wrapper">
 
@@ -99,7 +109,7 @@
                 </div>
             </div>
 
-            <!-- New Available Agents Button and Content -->
+            <!-- Available Agents Container - Displayed when toggled -->
             <div id="available-agents-container" class="instructions-display-container" style="display: none;">
                 <div class="instructions-content-wrapper">
                     <h3>Available Agents</h3>
@@ -131,6 +141,7 @@
                 </div>
             </div>
 
+            <!-- Configuration Upload Section -->
             <div class="panel-section">
                 <h3>Config Upload</h3>
                 <div class="config-input-toggle">
@@ -160,6 +171,8 @@
                 </div>
                 <div class="error-message" id="config-error-area"></div>
             </div>
+            
+            <!-- Message Publishing Section -->
             <div class="panel-section">
                 <h3>Publish Message</h3>
                 <form action="/publish" method="GET">
@@ -169,20 +182,24 @@
                     </div>
                     <div class="form-group">
                         <label for="message">Message (Floating-point number):</label>
-                        <input id="message" name="message" placeholder="e.g., 5" type="text">
+                        <input id="message" name="message" placeholder="e.g., 2.718" type="text">
                     </div>
                     <button id="message-btn" type="submit">Publish</button>
                     <div class="error-message" id="publish-error-area"></div>
                 </form>
             </div>
         </div>
+        
+        <!-- Right Panel - Graph Visualization -->
         <div class="right-panel">
             <h2>Graph Visualization</h2>
-            <iframe height="500px" id="graphFrame" src="temp.html" width="100%"></iframe>
+            <iframe height="620" id="graphFrame" src="temp.html" width="100%"></iframe>
         </div>
     </div>
 </div>
-<script src="./templateConfigs.js"></script>
+
+<!-- Scripts for functionality -->
+<script src="./templateConfig.js"></script>
 <script src="./uploadConfig.js"></script>
 <script src="./publishMessage.js"></script>
 <script src="./instructions.js"></script>

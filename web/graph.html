@@ -1,4 +1,14 @@
 <!DOCTYPE html>
+<!-- 
+ * Graph Visualization HTML Page
+ * 
+ * This file provides a web-based visualization of a graph structure
+ * using the vis-network library. It creates an interactive network
+ * diagram that fills the entire viewport.
+ *
+ * The graph data is injected into the template via the {{GRAPH_DATA}}
+ * placeholder before serving the page.
+ -->
 <html lang="en">
 
 <head>
@@ -8,9 +18,17 @@
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 
     <style>
+        /* 
+         * Basic styling to make the network visualization
+         * take up the full viewport
+         */
+        body {
+            margin: 0;
+            padding: 0;
+        }
         #network {
-            width: 600px;
-            height: 400px;
+            width: 100vw;
+            height: 100vh;
             border: 1px solid lightgray;
         }
     </style>
@@ -20,8 +38,18 @@
 <div id="network"></div>
 
 <script>
+    /**
+     * Graph data object that will be injected by the server before serving the page.
+     * This contains nodes and edges information for the visualization.
+     */
     const graphData = {{GRAPH_DATA}};
 
+    /**
+     * Prepares graph data for visualization with vis-network.
+     * 
+     * @param {Object} graphData - The raw graph data containing nodes and edges
+     * @returns {Object} - An object with DataSet instances for nodes and edges
+     */
     function prepareData(graphData) {
 
         return {
@@ -30,6 +58,14 @@
         };
     }
 
+    /**
+     * Initializes and configures the network visualization.
+     * 
+     * Sets up the visualization container, configures display options,
+     * and creates the network with the provided graph data.
+     * 
+     * @returns {vis.Network} - The initialized network object
+     */
     function initializeNetwork() {
         const container = document.getElementById("network");
         const options = {

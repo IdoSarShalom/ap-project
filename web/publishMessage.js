@@ -1,3 +1,10 @@
+/**
+ * publishMessage.js
+ * 
+ * This module handles the publishing of messages to topics in the pub/sub system.
+ * It provides form validation, error handling, and updates the graph visualization
+ * when a message is successfully published.
+ */
 document.addEventListener('DOMContentLoaded', () => {
     const publishForm = document.querySelector('.left-panel form[action="/publish"]'); // More specific selector
     const topicInput = document.getElementById('topic');

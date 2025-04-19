@@ -1,6 +1,9 @@
 /**
- * Instructions toggle functionality
- * This file handles the show/hide toggle for the instructions section
+ * instructions.js
+ * 
+ * This module handles the display and toggling of instructions and available agents sections.
+ * It provides functionality to show/hide these sections when the corresponding toggle buttons are clicked.
+ * The module initializes event listeners on page load to respond to user interactions.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -15,7 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const availableAgentsToggleButton = document.getElementById('available-agents-toggle-button');
     const availableAgentsContainer = document.getElementById('available-agents-container');
 
-    // Function to toggle instruction visibility
+    /**
+     * Toggles the visibility of the instructions section.
+     * 
+     * When called, this function will switch the instructions section between
+     * visible and hidden states, and update the text on all related toggle buttons.
+     */
     const toggleInstructions = () => {
         if (instructionsContainer.style.display === 'none' ||
             instructionsContainer.style.display === '') {
@@ -35,7 +43,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Function to toggle available agents visibility
+    /**
+     * Toggles the visibility of the available agents section.
+     * 
+     * When called, this function will switch the available agents section between
+     * visible and hidden states, and update the text on the toggle button.
+     */
     const toggleAvailableAgents = () => {
         if (availableAgentsContainer.style.display === 'none' ||
             availableAgentsContainer.style.display === '') {
@@ -50,11 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Add click event to the original toggle button
-    toggleButton.addEventListener('click', (event) => {
-        // Prevent event bubbling
-        event.stopPropagation();
-        toggleInstructions();
-    });
+    if (toggleButton) {
+        toggleButton.addEventListener('click', (event) => {
+            // Prevent event bubbling
+            event.stopPropagation();
+            toggleInstructions();
+        });
+    }
 
     // Add click event to the second toggle button (if it exists)
     if (secondToggleButton) {
